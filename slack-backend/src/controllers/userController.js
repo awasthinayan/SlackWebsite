@@ -1,0 +1,104 @@
+import {
+  registerUserService,
+  loginUserService,
+  sendOtpViaBrevoService,
+} from "../Services/userService.js";
+
+import {
+  verifyOTPService,
+  resetPasswordService,
+} from "../Services/userService.js";
+
+
+export const registerUserController = async (req, res) => {
+  try {
+    const user = await registerUserService(req.body);
+    console.log("Register request received:", req.body);
+
+    if (user?.error) {
+      console.log(user.error);
+      return res.status(400).json({
+        message: user.error,
+        status: false,
+      });
+    }
+    res.status(200).json({
+      message: "user created successfully",
+      status: true,
+      data: user,
+    });
+  } catch (error) {
+      console.log(error);
+      return res.status(400).json({
+        message: error.message,
+        status: false,
+      });
+   };
+};
+
+export const loginUserController = async (req, res) => {
+  try {
+    const token = await loginUserService(req.body);
+    console.log("Login request received:", req.body);
+
+     if (token?.error) {
+      return res.status(401).json({
+        message: token.error,
+        status: false,
+      });
+    }
+
+    res.status(200).json({
+      message: "user logged in successfully",
+      status: true,
+      token: token,
+    });
+  } catch (error) {
+    res.status(401).json({
+      message: error.message,
+      status: false,
+    });
+  }
+};
+
+export const sendOTPController = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const result = await sendOtpViaBrevoService(email);
+
+    if (result.success) {
+      return res.status(200).json({ message: "OTP sent successfully" });
+    } else {
+      return res.status(400).json({ message: "Failed to send OTP" });
+    }
+  } catch (error) {
+    console.error("Error in sendOTPController:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const verifyOTPController = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const result = await verifyOTPService(email, otp);
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const resetPasswordController = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const result = await resetPasswordService(email, password);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
