@@ -1,9 +1,11 @@
-import { getuserbyEmail } from "../Repo Layer/userRepo.js";
+import { getAllUsers, getuserbyEmail,updateUser } from "../Repo Layer/userRepo.js";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt.js";
 import { createUser } from "../Repo Layer/userRepo.js";
 import { saveOTP,verifyOTP, updateUserPassword } from "../Repo Layer/userRepo.js"
 import { sendOtpViaBrevo } from "../utils/sendOtpViaBrevo.js";
+import { getuserbyId } from "../Repo Layer/userRepo.js";
+import jwt from "jsonwebtoken";
 
 
 export const registerUserService = async (userData) =>{
@@ -41,25 +43,83 @@ export const registerUserService = async (userData) =>{
     }
 }
 
-export const loginUserService = async ({email,password}) =>{
-    try{
-        const user = await getuserbyEmail(email);
-       if (!user) throw new Error("User not found");
+export const loginUserService = async ({ email, password}) => {
+  try {
+    const user = await getuserbyEmail(email);
+    if (!user) throw new Error("User not found");
 
-        const isPasswordMatch = await bcrypt.compare(password,user.password);
-        if(!isPasswordMatch){
-            return {error:"Invalid password"};
-        }
-
-        const token = generateToken({id:user.id,email:user.email});
-        return token;
-
-    } catch(error){
-        console.log(error);
-        return {error:error.message};
+    // Validate password
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+      return { error: "Invalid password" };
     }
 
+    // Generate token using role from database ONLY
+    const token = generateToken({
+      id: user.id,
+      email: user.email,
+    });
+
+    return token;
+
+  } catch (error) {
+    console.log(error);
+    return { error: error.message };
+  }
+};
+
+
+export const getAllUsersService = async () =>{
+  try {
+    const users = await getAllUsers();
+    return {
+      success: true,
+      message: "Users fetched successfully",
+      status: 200,
+      data: users,
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      error: "Error fetching users",
+      message: error.message,
+      status: 500,
+      success: false,
+    }
+  }
 }
+
+export const updateUserService = async (id,userData) =>{
+    try{
+        const user = await getuserbyId(id);
+        console.log("response from service",user);  
+        if(!user){
+            return {
+                success: false,
+                message: "User not found",
+                status: 404,
+                data: null,
+            }
+        }
+        const updatedUser = await updateUser(id,userData);
+        console.log(updatedUser);
+        return {
+          success: true,
+          message: "User updated successfully",
+          status: 200,
+          data: updatedUser,  
+        }
+    } catch(error){
+        console.log(error);
+        return {
+            success: false,
+            message: "Error in updating the user",
+            status: 500,
+            data: null,
+        }
+    }
+}   
+
 
 export const checkifUserexistService = async (email) =>{
     try{

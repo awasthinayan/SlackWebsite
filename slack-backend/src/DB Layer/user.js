@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { en } from "zod/locales";
 
 const userSchema = new mongoose.Schema(
   {
@@ -45,7 +46,7 @@ const userSchema = new mongoose.Schema(
     },
     otpExpires:{
       type:Date,
-    }
+    },
   },
   { timestamps: true }
 );

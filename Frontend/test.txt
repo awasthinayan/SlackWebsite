@@ -1,0 +1,51 @@
+
+ // const [value, setvalue] = useState(0);
+
+  // const [color, setColor] = useState("white");
+
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     const randomColor =
+  //       "#" + Math.floor(Math.random() * 16777215).toString(16);
+  //     setColor(randomColor);
+  //     console.log(randomColor);
+  //   }, 2000);
+
+  //   return () => clearInterval(interval);
+  // }, []);
+
+  // const changeColor = () => {
+  //   const randomColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
+  //   setColor(randomColor);
+  //   console.log(randomColor);
+  // };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // <div
+    //   style={{
+    //     backgroundColor: color,
+    //     minHeight: "100vh",
+    //     alignItems: "center",
+    //     transition: "background-color 0.7s ease",
+    //   }}
+    // >
+    //   <Button onClick={() => setvalue(value + 1)}>Click Me</Button>
+    //   <p className="text-black">Button clicked {value} times</p>
+
+    //   <button onClick={changeColor}>Click to change color</button>
+    //   <h1 className="text-3xl font-bold ">Color is chnging automatically</h1>
+    //   <p className="text-black">Color is {color}</p>
+    // </div>

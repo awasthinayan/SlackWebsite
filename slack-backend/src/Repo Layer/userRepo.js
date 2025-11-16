@@ -1,3 +1,4 @@
+import e from "express";
 import user from "../DB Layer/user.js";
 
 export const createUser = async (userData) =>{
@@ -6,6 +7,28 @@ export const createUser = async (userData) =>{
 
 export const getuserbyEmail = async (email) =>{
     return await user.findOne({email});
+}
+
+export const getAllUsers = async () =>{
+    return await user.find({}).select("-password");
+}   
+
+export const getuserbyId = async (id) =>{
+  console.log("id in repo",id);
+    return await user.findOne({_id:id});
+}
+
+export const updateUser = async (id, userData) => {
+   console.log("response from repo",id)
+  return await user.findOneAndUpdate(
+    { _id: id },
+    userData,
+    { new: true, runValidators: true }
+  );
+};
+
+export const deleteUser = async (id) =>{
+    return await user.findOneAndDelete({_id:id});
 }
 
 export const saveOTP = async (email, otp) => {
