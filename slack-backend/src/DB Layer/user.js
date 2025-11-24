@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { en } from "zod/locales";
 
 const userSchema = new mongoose.Schema(
   {
@@ -18,7 +17,6 @@ const userSchema = new mongoose.Schema(
       unique: true,
       match: [/^\S+@\S+\.\S+$/, "Please provide a valid email address"],
     },
-
     name: {
       type: String,
       required: true,
