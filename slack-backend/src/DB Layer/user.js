@@ -39,14 +39,14 @@ const userSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    otp:{
-      type:String,
+    otp: {
+      type: String,
     },
-    otpExpires:{
-      type:Date,
+    otpExpires: {
+      type: Date,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const user = mongoose.model("user", userSchema);

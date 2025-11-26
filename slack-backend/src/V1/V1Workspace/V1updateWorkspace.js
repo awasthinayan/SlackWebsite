@@ -3,6 +3,6 @@ import { updateWorkspaceController } from "../../controllers/WorkspaceController
 
 const router = express.Router();
 
-router.put("/",updateWorkspaceController)
+router.put("/", updateWorkspaceController);
 
 export default router;

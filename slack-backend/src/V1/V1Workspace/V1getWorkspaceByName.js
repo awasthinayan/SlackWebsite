@@ -3,6 +3,6 @@ import { getWorkspaceByNameController } from "../../controllers/WorkspaceControl
 
 const router = express.Router();
 
-router.get("/",getWorkspaceByNameController)
+router.get("/", getWorkspaceByNameController);
 
 export default router;

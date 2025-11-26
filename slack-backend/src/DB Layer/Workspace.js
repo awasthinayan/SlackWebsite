@@ -34,9 +34,9 @@ const WorkspaceSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "Channel",
       },
-    ]
+    ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Workspace = mongoose.model("Workspace", WorkspaceSchema);

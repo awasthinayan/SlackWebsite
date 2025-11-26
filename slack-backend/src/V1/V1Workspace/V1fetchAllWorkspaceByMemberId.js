@@ -3,6 +3,6 @@ import { fetchAllWorkspaceByMemberIdController } from "../../controllers/Workspa
 
 const router = express.Router();
 
-router.get("/",fetchAllWorkspaceByMemberIdController)
+router.get("/", fetchAllWorkspaceByMemberIdController);
 
 export default router;

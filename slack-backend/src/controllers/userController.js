@@ -11,7 +11,6 @@ import {
   getAllUsersService,
 } from "../Services/userService.js";
 
-
 export const registerUserController = async (req, res) => {
   try {
     const user = await registerUserService(req.body);
@@ -30,12 +29,12 @@ export const registerUserController = async (req, res) => {
       data: user,
     });
   } catch (error) {
-      console.log(error);
-      return res.status(400).json({
-        message: error.message,
-        status: false,
-      });
-   };
+    console.log(error);
+    return res.status(400).json({
+      message: error.message,
+      status: false,
+    });
+  }
 };
 
 export const loginUserController = async (req, res) => {
@@ -46,11 +45,11 @@ export const loginUserController = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({
         status: false,
-        message: "Email and password are required"
+        message: "Email and password are required",
       });
     }
 
-    const token = await loginUserService({ email, password});
+    const token = await loginUserService({ email, password });
 
     if (token?.error) {
       return res.status(401).json({
@@ -64,7 +63,6 @@ export const loginUserController = async (req, res) => {
       status: true,
       token,
     });
-
   } catch (error) {
     return res.status(500).json({
       message: error.message,
@@ -72,7 +70,6 @@ export const loginUserController = async (req, res) => {
     });
   }
 };
-
 
 export const getAllUsersController = async (req, res) => {
   try {
@@ -96,15 +93,22 @@ export const getAllUsersController = async (req, res) => {
 export const updateUserController = async (req, res) => {
   try {
     const id = req.params.id;
-    console.log("id in controller",id);
-    const {name,username, phone, address, gender, dob } = req.body;
-    const result = await updateUserService(id, { name,username, phone, address, gender, dob });
+    console.log("id in controller", id);
+    const { name, username, phone, address, gender, dob } = req.body;
+    const result = await updateUserService(id, {
+      name,
+      username,
+      phone,
+      address,
+      gender,
+      dob,
+    });
 
- if (!result.success) {
+    if (!result.success) {
       return res.status(result.status).json({
         message: result.message,
         status: false,
-        data: null
+        data: null,
       });
     }
 
@@ -114,11 +118,10 @@ export const updateUserController = async (req, res) => {
       status: true,
       data: result.data,
     });
-
   } catch (error) {
     return res.status(500).json({
       message: error.message,
-      status: false
+      status: false,
     });
   }
 };

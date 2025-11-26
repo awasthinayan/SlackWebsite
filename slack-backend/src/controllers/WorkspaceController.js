@@ -1,4 +1,4 @@
-import { 
+import {
   createWorkspaceService,
   updateWorkspaceService,
   deleteWorkspaceService,
@@ -6,41 +6,48 @@ import {
   getWorkspaceByJoinCodeService,
   addMemberToWorkspaceService,
   addChannelToWorkspaceService,
-  fetchAllWorkspaceByMemberIdService,   
-  getAllWorkspaceService
+  fetchAllWorkspaceByMemberIdService,
+  getAllWorkspaceService,
+} from "../Services/WorkspaceService.js";
 
- } from "../Services/WorkspaceService.js";
-
- export const createWorkspaceController = async (req, res) => {
-   try {
-     const Createworkspace = await createWorkspaceService(req.body.workspaceName);
-     if (Createworkspace?.error) {
-      console.log(Createworkspace.error);
-       return res.status(400).json({
-         message: Createworkspace.error,
-         status: false,
-       });
-     }
-     res.status(200).json({
-       message: "Workspace created successfully",
-       status: true,
-       data: Createworkspace,
-     });
-   } catch (error) {
-     return res.status(500).json({
-       message: error.message,
-       status: false,
-     });
-   }
- };
+export const createWorkspaceController = async (req, res) => {
+  try {
+    const Createworkspace = await createWorkspaceService(
+      req.body.workspaceName,
+      req.body.description,
+    );
+    if (Createworkspace?.error) {
+      console.log(Createworkspace.message);
+      return res.status(400).json({
+        message: Createworkspace.message,
+        status: false,
+      });
+    }
+    res.status(200).json({
+      message: "Workspace created successfully",
+      status: true,
+      data: Createworkspace,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+      status: false,
+    });
+  }
+};
 
 export const updateWorkspaceController = async (req, res) => {
   try {
-    const workspaceupdate = await updateWorkspaceService(req.body.workspaceName, req.body.description);
+    const { id } = req.params;
+    const workspaceupdate = await updateWorkspaceService(
+      id,
+      req.body.workspaceName,
+      req.body.description,
+    );
     if (workspaceupdate?.error) {
-      console.log(workspaceupdate.error);
+      console.log(workspaceupdate.message);
       return res.status(400).json({
-        message: workspaceupdate.error,
+        message: workspaceupdate.message,
         status: false,
       });
     }
@@ -59,11 +66,13 @@ export const updateWorkspaceController = async (req, res) => {
 
 export const deleteWorkspaceController = async (req, res) => {
   try {
-    const deletedWorkspace = await deleteWorkspaceService(req.body.workspaceName);
+    const deletedWorkspace = await deleteWorkspaceService(
+      req.body.workspaceName,
+    );
     if (deletedWorkspace?.error) {
-      console.log(deletedWorkspace.error);
+      console.log(deletedWorkspace.message);
       return res.status(400).json({
-        message: deletedWorkspace.error,
+        message: deletedWorkspace.message,
         status: false,
       });
     }
@@ -105,7 +114,9 @@ export const getAllWorkspaceController = async (req, res) => {
 
 export const getWorkspaceByNameController = async (req, res) => {
   try {
-    const getWorkspaceByname = await getWorkspaceByNameService(req.body.workspaceName);
+    const getWorkspaceByname = await getWorkspaceByNameService(
+      req.body.workspaceName,
+    );
     if (getWorkspaceByname?.error) {
       console.log(getWorkspaceByname.error);
       return res.status(400).json({
@@ -128,7 +139,9 @@ export const getWorkspaceByNameController = async (req, res) => {
 
 export const getWorkspaceByJoinCodeController = async (req, res) => {
   try {
-    const getWorkspaceByJoinCode = await getWorkspaceByJoinCodeService(req.body.JoinCode);
+    const getWorkspaceByJoinCode = await getWorkspaceByJoinCodeService(
+      req.body.JoinCode,
+    );
     if (getWorkspaceByJoinCode?.error) {
       console.log(getWorkspaceByJoinCode.error);
       return res.status(400).json({
@@ -151,7 +164,11 @@ export const getWorkspaceByJoinCodeController = async (req, res) => {
 
 export const addMemberToWorkspaceController = async (req, res) => {
   try {
-    const addMemberSpace = await addMemberToWorkspaceService(req.body.workspaceName, req.body.memberId, req.body.role);
+    const addMemberSpace = await addMemberToWorkspaceService(
+      req.body.workspaceName,
+      req.body.memberId,
+      req.body.role,
+    );
     if (addMemberSpace?.error) {
       console.log(addMemberSpace.error);
       return res.status(400).json({
@@ -174,7 +191,10 @@ export const addMemberToWorkspaceController = async (req, res) => {
 
 export const addChannelToWorkspaceController = async (req, res) => {
   try {
-    const addChannelSpace = await addChannelToWorkspaceService(req.body.workspaceName, req.body.channelName);
+    const addChannelSpace = await addChannelToWorkspaceService(
+      req.body.workspaceName,
+      req.body.channelName,
+    );
     if (addChannelSpace?.error) {
       console.log(addChannelSpace.error);
       return res.status(400).json({
@@ -197,7 +217,8 @@ export const addChannelToWorkspaceController = async (req, res) => {
 
 export const fetchAllWorkspaceByMemberIdController = async (req, res) => {
   try {
-    const fetchAllWorkspaceByMemberId = await fetchAllWorkspaceByMemberIdService(req.body.memberId);
+    const fetchAllWorkspaceByMemberId =
+      await fetchAllWorkspaceByMemberIdService(req.body.memberId);
     if (fetchAllWorkspaceByMemberId?.error) {
       console.log(fetchAllWorkspaceByMemberId.error);
       return res.status(400).json({
@@ -217,4 +238,3 @@ export const fetchAllWorkspaceByMemberIdController = async (req, res) => {
     });
   }
 };
-

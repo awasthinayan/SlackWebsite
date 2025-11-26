@@ -1,49 +1,65 @@
-import { getAllUsers, getuserbyEmail,updateUser } from "../Repo Layer/userRepo.js";
+import {
+  getAllUsers,
+  getuserbyEmail,
+  updateUser,
+} from "../Repo Layer/userRepo.js";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt.js";
 import { createUser } from "../Repo Layer/userRepo.js";
-import { saveOTP,verifyOTP, updateUserPassword } from "../Repo Layer/userRepo.js"
+import {
+  saveOTP,
+  verifyOTP,
+  updateUserPassword,
+} from "../Repo Layer/userRepo.js";
 import { sendOtpViaBrevo } from "../utils/sendOtpViaBrevo.js";
 import { getuserbyId } from "../Repo Layer/userRepo.js";
 import jwt from "jsonwebtoken";
 
+export const registerUserService = async (userData) => {
+  try {
+    // some validation in server side
 
-export const registerUserService = async (userData) =>{
-    try{
-          // some validation in server side
-
-          const {email,password,username,name,phone,address,gender,dob} = userData;
-          if(!email || !password || !username || !name || !phone || !address || !gender || !dob){
-            return {error:"Please fill all the fields"};
-          }
-          
-    const existingUser = await getuserbyEmail(userData.email);
-    if(existingUser){
-        return {error:"Email already exists"};
+    const { email, password, username, name, phone, address, gender, dob } =
+      userData;
+    if (
+      !email ||
+      !password ||
+      !username ||
+      !name ||
+      !phone ||
+      !address ||
+      !gender ||
+      !dob
+    ) {
+      return { error: "Please fill all the fields" };
     }
 
-    const hashedPassword = await bcrypt.hash(userData.password,10);
+    const existingUser = await getuserbyEmail(userData.email);
+    if (existingUser) {
+      return { error: "Email already exists" };
+    }
+
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
 
     const newUser = await createUser({
-        username:userData.username,
-        password:hashedPassword,
-        email:userData.email,
-        name:userData.name,
-        phone:userData.phone,
-        address:userData.address,
-        gender:userData.gender,
-        dob:userData.dob    
+      username: userData.username,
+      password: hashedPassword,
+      email: userData.email,
+      name: userData.name,
+      phone: userData.phone,
+      address: userData.address,
+      gender: userData.gender,
+      dob: userData.dob,
     });
 
-    return newUser;  
+    return newUser;
+  } catch (error) {
+    console.log(error);
+    return { error: error.message };
+  }
+};
 
-    }  catch(error){
-        console.log(error);
-        return {error:error.message};
-    }
-}
-
-export const loginUserService = async ({ email, password}) => {
+export const loginUserService = async ({ email, password }) => {
   try {
     const user = await getuserbyEmail(email);
     if (!user) throw new Error("User not found");
@@ -61,15 +77,13 @@ export const loginUserService = async ({ email, password}) => {
     });
 
     return token;
-
   } catch (error) {
     console.log(error);
     return { error: error.message };
   }
 };
 
-
-export const getAllUsersService = async () =>{
+export const getAllUsersService = async () => {
   try {
     const users = await getAllUsers();
     return {
@@ -77,7 +91,7 @@ export const getAllUsersService = async () =>{
       message: "Users fetched successfully",
       status: 200,
       data: users,
-    }
+    };
   } catch (error) {
     console.log(error);
     return {
@@ -85,55 +99,53 @@ export const getAllUsersService = async () =>{
       message: error.message,
       status: 500,
       success: false,
-    }
+    };
   }
-}
+};
 
-export const updateUserService = async (id,userData) =>{
-    try{
-        const user = await getuserbyId(id);
-        console.log("response from service",user);  
-        if(!user){
-            return {
-                success: false,
-                message: "User not found",
-                status: 404,
-                data: null,
-            }
-        }
-        const updatedUser = await updateUser(id,userData);
-        console.log(updatedUser);
-        return {
-          success: true,
-          message: "User updated successfully",
-          status: 200,
-          data: updatedUser,  
-        }
-    } catch(error){
-        console.log(error);
-        return {
-            success: false,
-            message: "Error in updating the user",
-            status: 500,
-            data: null,
-        }
+export const updateUserService = async (id, userData) => {
+  try {
+    const user = await getuserbyId(id);
+    console.log("response from service", user);
+    if (!user) {
+      return {
+        success: false,
+        message: "User not found",
+        status: 404,
+        data: null,
+      };
     }
-}   
+    const updatedUser = await updateUser(id, userData);
+    console.log(updatedUser);
+    return {
+      success: true,
+      message: "User updated successfully",
+      status: 200,
+      data: updatedUser,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      message: "Error in updating the user",
+      status: 500,
+      data: null,
+    };
+  }
+};
 
-
-export const checkifUserexistService = async (email) =>{
-    try{
-        const user = await getuserbyEmail(email);
-        if(!user){
-            return {error:"User not found"};
-        }
-        return user;
-    } catch(error){
-        console.log(error);
-        return {error:error.message};
+export const checkifUserexistService = async (email) => {
+  try {
+    const user = await getuserbyEmail(email);
+    if (!user) {
+      return { error: "User not found" };
     }
-}
-
+    return user;
+  } catch (error) {
+    console.log(error);
+    return { error: error.message };
+  }
+};
 
 export const sendOtpViaBrevoService = async (email) => {
   try {

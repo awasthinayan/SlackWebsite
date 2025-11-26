@@ -22,7 +22,7 @@ export const sendOtpViaBrevo = async (email, otp) => {
       textContent: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
       htmlContent: `<h3>Your OTP Code: <strong>${otp}</strong></h3><p>It will expire in 5 minutes.</p>`,
     });
-    console.log(otp)
+    console.log(otp);
     console.log("✅ OTP sent successfully via Brevo");
     return true;
   } catch (err) {

@@ -3,6 +3,6 @@ import { verifyOTPController } from "../../controllers/userController.js";
 
 const router = express.Router();
 
-router.post("/",verifyOTPController);
+router.post("/", verifyOTPController);
 
 export default router;

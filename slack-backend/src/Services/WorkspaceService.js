@@ -13,29 +13,27 @@ import {
   fetchAllWorkspaceByMemberId,
 } from "../Repo Layer/WorkspaceRepo.js";
 
-
 // ------------------------------------------------------
 // CREATE WORKSPACE
 // ------------------------------------------------------
 
 // Create a Workspace with a name and a join code
-export const createWorkspaceService = async (workspaceName) => {
+export const createWorkspaceService = async (workspaceName, description) => {
   try {
     // created the join code
-   const JoinCode = uuidv4().slice(0, 8);
+    const JoinCode = uuidv4().slice(0, 8);
 
-   // check the workspace name is unique and is present or not
-   const workspace = await getWorkspaceByName(workspaceName);
+    // check the workspace name is unique and is present or not
+    const workspace = await getWorkspaceByName(workspaceName);
 
-   if (workspace) {
-     return {
-       error: true,
-       status: StatusCodes.BAD_REQUEST,
-       data: { message: "Workspace already exists", data: null },
-     };
-   }
-   return await createWorkspace(workspaceName, JoinCode);
-
+    if (workspace) {
+      return {
+        error: true,
+        status: StatusCodes.BAD_REQUEST,
+        message: "Workspace already exists pleas make new one",
+      };
+    }
+    return await createWorkspace(workspaceName, description, JoinCode);
   } catch (error) {
     return {
       error: true,
@@ -48,16 +46,28 @@ export const createWorkspaceService = async (workspaceName) => {
 // ------------------------------------------------------
 // UPDATE WORKSPACE
 // ------------------------------------------------------
-export const updateWorkspaceService = async (workspaceName, description) => { 
+export const updateWorkspaceService = async (
+  id,
+  workspaceName,
+  description,
+) => {
   try {
-    const updatedWorkspace = await updateWorkpace(workspaceName, description);
+    const updatedWorkspace = await updateWorkpace(
+      id,
+      workspaceName,
+      description,
+    );
+    console.log("Workspace not found", updateWorkpace);
+
+    const findworkspace = await getWorkspaceByName(workspaceName);
+    console.log("findworkspace", findworkspace);
 
     // Update that workspace that is already exist
     if (!updatedWorkspace) {
       return {
         error: true,
         status: StatusCodes.NOT_FOUND,
-        data: { message: "Workspace not found", data: null },
+        message: { message: "Workspace not found", data: null },
       };
     }
     return {
@@ -80,7 +90,6 @@ export const updateWorkspaceService = async (workspaceName, description) => {
 
 export const deleteWorkspaceService = async (workspaceName) => {
   try {
-
     const deletedWorkspace = await deleteWorkspace(workspaceName);
 
     // Delete that workspace that is already exist
@@ -88,7 +97,7 @@ export const deleteWorkspaceService = async (workspaceName) => {
       return {
         error: true,
         status: StatusCodes.NOT_FOUND,
-        data: { message: "Workspace not found", data: null },
+        message: { message: "Workspace not found", data: null },
       };
     }
     return {
@@ -103,8 +112,7 @@ export const deleteWorkspaceService = async (workspaceName) => {
       data: { message: "Server error", data: null },
     };
   }
-};    
-
+};
 
 // ------------------------------------------------------
 // GET ALL WORKSPACE
@@ -191,15 +199,23 @@ export const getWorkspaceByJoinCodeService = async (JoinCode) => {
       status: StatusCodes.INTERNAL_SERVER_ERROR,
       data: { message: "Server error", data: null },
     };
-  } 
+  }
 };
 
 // ------------------------------------------------------
 // ADD MEMBER
 // ------------------------------------------------------
-export const addMemberToWorkspaceService = async (workspaceName, memberId, role) => {
+export const addMemberToWorkspaceService = async (
+  workspaceName,
+  memberId,
+  role,
+) => {
   try {
-    const addmemeber = await addMemberToWorkspace(workspaceName, memberId, role);
+    const addmemeber = await addMemberToWorkspace(
+      workspaceName,
+      memberId,
+      role,
+    );
 
     const checkworkspace = await getWorkspaceByName(workspaceName);
 
@@ -214,16 +230,16 @@ export const addMemberToWorkspaceService = async (workspaceName, memberId, role)
 
     // chekc if the member is already exist or not
     const alreadyMember = addmemeber.members.find(
-      (m) => m.memberId === memberId
-      );
+      (m) => m.memberId === memberId,
+    );
 
-      if (alreadyMember) {
-        return {
-          error: true,
-          status: StatusCodes.BAD_REQUEST,
-          data: { message: "Member already exists", data: null },
-        };
-      }
+    if (alreadyMember) {
+      return {
+        error: true,
+        status: StatusCodes.BAD_REQUEST,
+        data: { message: "Member already exists", data: null },
+      };
+    }
     return {
       error: false,
       status: StatusCodes.OK,
@@ -236,14 +252,16 @@ export const addMemberToWorkspaceService = async (workspaceName, memberId, role)
       data: { message: "Server error", data: null },
     };
   }
-};  
+};
 
 // ------------------------------------------------------
 // ADD CHANNEL
 // ------------------------------------------------------
-export const addChannelToWorkspaceService = async (workspaceName, channelName) => {
+export const addChannelToWorkspaceService = async (
+  workspaceName,
+  channelName,
+) => {
   try {
-
     const addChannel = await addChannelToWorkspace(workspaceName, channelName);
 
     const workspace = await getWorkspaceByName(workspaceName);
@@ -258,22 +276,20 @@ export const addChannelToWorkspaceService = async (workspaceName, channelName) =
     }
 
     // chekc if the channel is already exist or not
-    const alreadyChannel = addChannel.channels.find(
-      (c) => c === channelName
-      );
+    const alreadyChannel = addChannel.channels.find((c) => c === channelName);
 
-      if (alreadyChannel) {
-        return {
-          error: true,
-          status: StatusCodes.BAD_REQUEST,
-          data: { message: "Channel already exists", data: null },
-        };
-      }
+    if (alreadyChannel) {
       return {
-        error: false,
-        status: StatusCodes.OK, 
-        data: addChannel,
-      }
+        error: true,
+        status: StatusCodes.BAD_REQUEST,
+        data: { message: "Channel already exists", data: null },
+      };
+    }
+    return {
+      error: false,
+      status: StatusCodes.OK,
+      data: addChannel,
+    };
   } catch (error) {
     return {
       error: true,
@@ -284,7 +300,7 @@ export const addChannelToWorkspaceService = async (workspaceName, channelName) =
 };
 
 // ------------------------------------------------------
-export const fetchAllWorkspaceByMemberIdService = async (memberId) => { 
+export const fetchAllWorkspaceByMemberIdService = async (memberId) => {
   try {
     const workspaces = await fetchAllWorkspaceByMemberId(memberId);
 
@@ -296,19 +312,17 @@ export const fetchAllWorkspaceByMemberIdService = async (memberId) => {
         data: { message: "Workspace not found", data: null },
       };
     }
-    
+
     return {
       error: false,
       status: StatusCodes.OK,
       data: workspaces,
     };
-  }
-  catch (error) {
+  } catch (error) {
     return {
       error: true,
       status: StatusCodes.INTERNAL_SERVER_ERROR,
       data: { message: "Server error", data: null },
     };
   }
-};  
-
+};

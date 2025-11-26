@@ -3,6 +3,6 @@ import { addMemberToWorkspaceController } from "../../controllers/WorkspaceContr
 
 const router = express.Router();
 
-router.post("/",addMemberToWorkspaceController) 
+router.post("/", addMemberToWorkspaceController);
 
 export default router;

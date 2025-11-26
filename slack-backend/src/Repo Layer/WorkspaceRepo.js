@@ -1,28 +1,28 @@
 // Repo Layer (Data Access Layer)
 import Workspace from "../DB Layer/Workspace.js";
 
-export const createWorkspace = async (workspaceName, JoinCode) => {
+export const createWorkspace = async (workspaceName, description, JoinCode) => {
   try {
-    return await Workspace.create({ workspaceName, JoinCode });
+    return await Workspace.create({ workspaceName, description, JoinCode });
   } catch (error) {
     console.log(error);
     return null;
   }
 };
 
-export const updateWorkpace = async (workspaceName, description) => {
+export const updateWorkpace = async (id, workspaceName, description) => {
   try {
     const updateWorskpace = await Workspace.findOneAndUpdate(
-      { workspaceName },
-      { $set: { description } },
-      { new: true }
+      id,
+      { $set: { workspaceName, description } },
+      { new: true },
     );
     return updateWorskpace;
   } catch (error) {
     console.log(error);
     throw new Error("Error updating workspace");
   }
-}
+};
 
 export const deleteWorkspace = async (workspaceName) => {
   try {
@@ -76,7 +76,7 @@ export const addMemberToWorkspace = async (workspaceName, memberId, role) => {
     return await Workspace.findOneAndUpdate(
       { workspaceName },
       { $push: { members: { memberId, role } } },
-      { new: true }
+      { new: true },
     );
   } catch (error) {
     console.log(error);
@@ -89,7 +89,7 @@ export const addChannelToWorkspace = async (workspaceName, channelName) => {
     return await Workspace.findOneAndUpdate(
       { workspaceName },
       { $push: { channels: channelName } },
-      { new: true }
+      { new: true },
     );
   } catch (error) {
     console.log(error);
