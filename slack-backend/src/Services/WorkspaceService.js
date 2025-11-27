@@ -11,34 +11,102 @@ import {
   addMemberToWorkspace,
   addChannelToWorkspace,
   fetchAllWorkspaceByMemberId,
-} from "../Repo Layer/WorkspaceRepo.js";
+  getWorkspaceById,
+} from "../RepoLayer/WorkspaceRepo.js";
+import { createChannel } from "../RepoLayer/ChannelRepo.js";
+import user from "../DBLayer/userSchema.js";
 
 // ------------------------------------------------------
 // CREATE WORKSPACE
 // ------------------------------------------------------
 
-// Create a Workspace with a name and a join code
-export const createWorkspaceService = async (workspaceName, description) => {
+export const createWorkspaceService = async (
+  workspaceName,
+  description,
+  memberId
+) => {
   try {
-    // created the join code
+    // generate join code
     const JoinCode = uuidv4().slice(0, 8);
 
-    // check the workspace name is unique and is present or not
-    const workspace = await getWorkspaceByName(workspaceName);
+    // check if workspace already exists
+    const existing = await getWorkspaceByName(workspaceName);
 
-    if (workspace) {
+    if (existing) {
       return {
         error: true,
         status: StatusCodes.BAD_REQUEST,
-        message: "Workspace already exists pleas make new one",
+        message: "Workspace already exists. Please create a new one.",
       };
     }
-    return await createWorkspace(workspaceName, description, JoinCode);
+
+    // STEP 1 → Create workspace
+    const workspace = await createWorkspace(
+      workspaceName,
+      description,
+      JoinCode
+    );
+
+    if (!workspace) {
+      return {
+        error: true,
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        message: "Failed to create workspace",
+      };
+    }
+
+    // STEP 2 → Add admin member
+    const updatedWorkspace = await addMemberToWorkspace(
+      workspace._id,
+      memberId,
+      "admin"
+    );
+    console.log("updatedWorkspace", updatedWorkspace);
+    if (!updatedWorkspace) {
+      return {
+        error: true,
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        message: "Failed to add member to workspace",
+      };
+    }
+
+    // STEP 3 → Create default channel "general"
+    const channel = await createChannel("general", workspaceName);
+
+    if (!channel) {
+      return {
+        error: true,
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        message: "Failed to create default channel",
+      };
+    }
+
+    // STEP 4 → Add channel to workspace
+    const updatedWorkspaceChannels = await addChannelToWorkspace(
+      workspaceName,
+      channel._id,
+      channel.ChannelName
+    );
+
+    if (!updatedWorkspaceChannels) {
+      return {
+        error: true,
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        message: "Failed to add channel to workspace",
+      };
+    }
+
+    return {
+      error: false,
+      status: StatusCodes.CREATED,
+      data: updatedWorkspaceChannels,
+    };
   } catch (error) {
+    console.log(error);
     return {
       error: true,
       status: StatusCodes.INTERNAL_SERVER_ERROR,
-      data: { message: "Server error", data: null },
+      message: "Server error",
     };
   }
 };
@@ -49,13 +117,13 @@ export const createWorkspaceService = async (workspaceName, description) => {
 export const updateWorkspaceService = async (
   id,
   workspaceName,
-  description,
+  description
 ) => {
   try {
     const updatedWorkspace = await updateWorkpace(
       id,
       workspaceName,
-      description,
+      description
     );
     console.log("Workspace not found", updateWorkpace);
 
@@ -206,45 +274,50 @@ export const getWorkspaceByJoinCodeService = async (JoinCode) => {
 // ADD MEMBER
 // ------------------------------------------------------
 export const addMemberToWorkspaceService = async (
-  workspaceName,
+  workspaceId,
   memberId,
-  role,
+  role
 ) => {
   try {
-    const addmemeber = await addMemberToWorkspace(
-      workspaceName,
-      memberId,
-      role,
-    );
-
-    const checkworkspace = await getWorkspaceByName(workspaceName);
-
-    // Update that workspace that is already exist
-    if (!checkworkspace) {
+    const workspace = await getWorkspaceById(workspaceId);
+    if (!workspace) {
       return {
         error: true,
         status: StatusCodes.NOT_FOUND,
         data: { message: "Workspace not found", data: null },
       };
     }
+    const isValidUser = await user.findById(memberId);
+    if (!isValidUser) {
+      return {
+        error: true,
+        status: StatusCodes.NOT_FOUND,
+        data: { message: "User not found", data: null },
+      };
+    }
 
-    // chekc if the member is already exist or not
-    const alreadyMember = addmemeber.members.find(
-      (m) => m.memberId === memberId,
+    const isMember = workspace.members.find(
+      (m) => String(m.memberId) === String(memberId)
     );
 
-    if (alreadyMember) {
+    if (isMember) {
       return {
         error: true,
         status: StatusCodes.BAD_REQUEST,
         data: { message: "Member already exists", data: null },
       };
     }
-    return {
-      error: false,
-      status: StatusCodes.OK,
-      data: addmemeber,
-    };
+
+    const response = await addMemberToWorkspace(workspaceId, memberId, role);
+    console.log("response", response);
+    if (!response) {
+      return {
+        error: true,
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        data: { message: "Server error", data: null },
+      };
+    }
+    return response;
   } catch (error) {
     return {
       error: true,
@@ -259,7 +332,7 @@ export const addMemberToWorkspaceService = async (
 // ------------------------------------------------------
 export const addChannelToWorkspaceService = async (
   workspaceName,
-  channelName,
+  channelName
 ) => {
   try {
     const addChannel = await addChannelToWorkspace(workspaceName, channelName);
@@ -300,12 +373,13 @@ export const addChannelToWorkspaceService = async (
 };
 
 // ------------------------------------------------------
-export const fetchAllWorkspaceByMemberIdService = async (memberId) => {
+export const fetchAllWorkspaceByMemberIdService = async (userId) => {
   try {
-    const workspaces = await fetchAllWorkspaceByMemberId(memberId);
+    const response = await fetchAllWorkspaceByMemberId(userId);
+    console.log("id in service", userId);
 
     // if no workspace is found
-    if (!workspaces) {
+    if (!response || response.length === 0) {
       return {
         error: true,
         status: StatusCodes.NOT_FOUND,
@@ -316,7 +390,7 @@ export const fetchAllWorkspaceByMemberIdService = async (memberId) => {
     return {
       error: false,
       status: StatusCodes.OK,
-      data: workspaces,
+      data: response,
     };
   } catch (error) {
     return {

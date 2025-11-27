@@ -15,6 +15,7 @@ export const createWorkspaceController = async (req, res) => {
     const Createworkspace = await createWorkspaceService(
       req.body.workspaceName,
       req.body.description,
+      req.user?.id
     );
     if (Createworkspace?.error) {
       console.log(Createworkspace.message);
@@ -42,7 +43,7 @@ export const updateWorkspaceController = async (req, res) => {
     const workspaceupdate = await updateWorkspaceService(
       id,
       req.body.workspaceName,
-      req.body.description,
+      req.body.description
     );
     if (workspaceupdate?.error) {
       console.log(workspaceupdate.message);
@@ -67,7 +68,7 @@ export const updateWorkspaceController = async (req, res) => {
 export const deleteWorkspaceController = async (req, res) => {
   try {
     const deletedWorkspace = await deleteWorkspaceService(
-      req.body.workspaceName,
+      req.body.workspaceName
     );
     if (deletedWorkspace?.error) {
       console.log(deletedWorkspace.message);
@@ -115,7 +116,7 @@ export const getAllWorkspaceController = async (req, res) => {
 export const getWorkspaceByNameController = async (req, res) => {
   try {
     const getWorkspaceByname = await getWorkspaceByNameService(
-      req.body.workspaceName,
+      req.body.workspaceName
     );
     if (getWorkspaceByname?.error) {
       console.log(getWorkspaceByname.error);
@@ -140,7 +141,7 @@ export const getWorkspaceByNameController = async (req, res) => {
 export const getWorkspaceByJoinCodeController = async (req, res) => {
   try {
     const getWorkspaceByJoinCode = await getWorkspaceByJoinCodeService(
-      req.body.JoinCode,
+      req.body.JoinCode
     );
     if (getWorkspaceByJoinCode?.error) {
       console.log(getWorkspaceByJoinCode.error);
@@ -165,14 +166,14 @@ export const getWorkspaceByJoinCodeController = async (req, res) => {
 export const addMemberToWorkspaceController = async (req, res) => {
   try {
     const addMemberSpace = await addMemberToWorkspaceService(
-      req.body.workspaceName,
+      req.body.workspaceId,
       req.body.memberId,
-      req.body.role,
+      req.body.role
     );
     if (addMemberSpace?.error) {
-      console.log(addMemberSpace.error);
+      console.log(addMemberSpace.message);
       return res.status(400).json({
-        message: addMemberSpace.error,
+        message: addMemberSpace.message,
         status: false,
       });
     }
@@ -193,7 +194,7 @@ export const addChannelToWorkspaceController = async (req, res) => {
   try {
     const addChannelSpace = await addChannelToWorkspaceService(
       req.body.workspaceName,
-      req.body.channelName,
+      req.body.channelName
     );
     if (addChannelSpace?.error) {
       console.log(addChannelSpace.error);
@@ -217,19 +218,20 @@ export const addChannelToWorkspaceController = async (req, res) => {
 
 export const fetchAllWorkspaceByMemberIdController = async (req, res) => {
   try {
-    const fetchAllWorkspaceByMemberId =
-      await fetchAllWorkspaceByMemberIdService(req.body.memberId);
-    if (fetchAllWorkspaceByMemberId?.error) {
-      console.log(fetchAllWorkspaceByMemberId.error);
+    const result = await fetchAllWorkspaceByMemberIdService(req.user.id);
+    console.log("id in controller", req.user.id);
+
+    if (result?.error) {
+      console.log(result.message);
       return res.status(400).json({
-        message: fetchAllWorkspaceByMemberId.error,
+        message: result.message,
         status: false,
       });
     }
     res.status(200).json({
       message: "All workspaces fetched successfully",
       status: true,
-      data: fetchAllWorkspaceByMemberId,
+      data: result.data,
     });
   } catch (error) {
     return res.status(500).json({

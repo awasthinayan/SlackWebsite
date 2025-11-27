@@ -2,18 +2,18 @@ import {
   getAllUsers,
   getuserbyEmail,
   updateUser,
-} from "../Repo Layer/userRepo.js";
+} from "../RepoLayer/userRepo.js";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt.js";
-import { createUser } from "../Repo Layer/userRepo.js";
+import { createUser } from "../RepoLayer/userRepo.js";
 import {
   saveOTP,
   verifyOTP,
   updateUserPassword,
-} from "../Repo Layer/userRepo.js";
+} from "../RepoLayer/userRepo.js";
 import { sendOtpViaBrevo } from "../utils/sendOtpViaBrevo.js";
-import { getuserbyId } from "../Repo Layer/userRepo.js";
-import jwt from "jsonwebtoken";
+import { getuserbyId } from "../RepoLayer/userRepo.js";
+
 
 export const registerUserService = async (userData) => {
   try {

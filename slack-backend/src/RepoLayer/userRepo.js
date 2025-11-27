@@ -1,5 +1,5 @@
-import e from "express";
-import user from "../DB Layer/user.js";
+
+import user from "../DBLayer/userSchema.js";
 
 export const createUser = async (userData) => {
   return await user.create(userData);

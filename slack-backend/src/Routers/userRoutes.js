@@ -22,6 +22,7 @@ import V1getWorkspaceByJoinCode from "../V1/V1Workspace/V1getWorkspaceByJoinCode
 import V1addMemberToWorkspace from "../V1/V1Workspace/V1addMemberToWorkspace.js";
 import V1addChannelToWorkspace from "../V1/V1Workspace/V1addChannelToWorkspace.js";
 import V1fetchAllWorkspaceByMemberId from "../V1/V1Workspace/V1fetchAllWorkspaceByMemberId.js";
+import authMiddleware from "../Middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -40,20 +41,23 @@ router.use("/V1/resetPassword", V1resetPassword);
 
 router.use(
   "/V1/workspaces/createWorkspace",
+  authMiddleware,
   validate(WorkspaceSchema),
   V1CreateWorkspace,
 );
 router.use(
   "/V1/workspaces/updateWorkspace/:id",
+  authMiddleware,
   validate(WorkspaceSchema),
   V1updateWorkspace,
 );
 router.use(
   "/V1/workspaces/deleteWorkspace",
+  authMiddleware,
   validate(WorkspaceSchema),
   V1deletWorkspace,
 );
-router.use("/V1/workspaces/getAllWorkspace", V1getAllWorkspaces);
+router.use("/V1/workspaces/getAllWorkspace",authMiddleware, V1getAllWorkspaces);
 
 router.use("/V1/workspaces/getWorkspaceByName", V1getWorkspaceByName);
 router.use("/V1/workspaces/getWorkspaceByJoinCode", V1getWorkspaceByJoinCode);

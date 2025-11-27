@@ -1,12 +1,11 @@
-import mongoose, { mongo } from "mongoose";
-import { string } from "zod";
+import mongoose from "mongoose";
 
 const ChannelSchema = new mongoose.Schema(
   {
     ChannelName: {
-      type: string,
+      type: String,
       required: [true, "Channel name is required"],
-      Unique: true,
+      unique: true,
     },
     createdAt: {
       type: Date,
@@ -17,7 +16,7 @@ const ChannelSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 const Channel = mongoose.model("Channel", ChannelSchema);
