@@ -54,13 +54,12 @@ router.use(
 router.use(
   "/V1/workspaces/deleteWorkspace",
   authMiddleware,
-  validate(WorkspaceSchema),
   V1deletWorkspace,
 );
 router.use("/V1/workspaces/getAllWorkspace",authMiddleware, V1getAllWorkspaces);
 
 router.use("/V1/workspaces/getWorkspaceByName", V1getWorkspaceByName);
-router.use("/V1/workspaces/getWorkspaceByJoinCode", V1getWorkspaceByJoinCode);
+router.use("/V1/workspaces/getWorkspaceByJoinCode", authMiddleware,V1getWorkspaceByJoinCode);
 router.use(
   "/V1/workspaces/addMemberToWorkspace",
   validate(WorkspaceSchema),

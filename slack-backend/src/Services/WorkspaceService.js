@@ -5,6 +5,7 @@ import {
   createWorkspace,
   updateWorkpace,
   deleteWorkspace,
+  deleteWorkspaceById,
   getAllWorkspace,
   getWorkspaceByName,
   getWorkspaceByJoinCode,
@@ -27,7 +28,7 @@ export const createWorkspaceService = async (
 ) => {
   try {
     // generate join code
-    const JoinCode = uuidv4().slice(0, 8);
+    const JoinCode = uuidv4().slice(0, 8).toUpperCase();
 
     // check if workspace already exists
     const existing = await getWorkspaceByName(workspaceName);
@@ -156,24 +157,60 @@ export const updateWorkspaceService = async (
 // DELETE WORKSPACE
 // ------------------------------------------------------
 
-export const deleteWorkspaceService = async (workspaceName) => {
+export const deleteWorkspaceService = async (workspaceId, memberId) => {
   try {
-    const deletedWorkspace = await deleteWorkspace(workspaceName);
+    // For simplicity: require workspaceId (params) and treat it as ObjectId
+    if (
+      !workspaceId ||
+      typeof workspaceId !== "string" ||
+      !/^[0-9a-fA-F]{24}$/.test(workspaceId)
+    ) {
+      return {
+        error: true,
+        status: StatusCodes.BAD_REQUEST,
+        data: { message: "Invalid workspace id", data: null },
+      };
+    }
 
-    // Delete that workspace that is already exist
-    if (!deletedWorkspace) {
+    const workspace = await getWorkspaceById(workspaceId);
+    console.log("workspace in service:", workspaceId);
+    if (!workspace) {
       return {
         error: true,
         status: StatusCodes.NOT_FOUND,
-        message: { message: "Workspace not found", data: null },
+        data: { message: "Workspace not found", data: null },
       };
     }
+
+    // Check whether the provided memberId is part of this workspace
+    // Note: m.memberId is a populated user object (has _id field), not a raw id
+    const isMember = workspace.members.some((m) => {
+      const storedId = m.memberId._id || m.memberId;
+      return String(storedId) === String(memberId);
+    });
+    console.log("isMember check - searching for memberId:", memberId);
+    console.log(
+      "workspace members stored ids:",
+      workspace.members.map((m) => String(m.memberId._id || m.memberId))
+    );
+    console.log("isMember result:", isMember);
+    if (!isMember) {
+      return {
+        error: true,
+        status: StatusCodes.FORBIDDEN,
+        data: { message: "Member not part of workspace", data: null },
+      };
+    }
+
+    const deleted = await deleteWorkspaceById(workspaceId);
+    console.log("deleted in service:", deleted);
     return {
       error: false,
       status: StatusCodes.OK,
-      data: deletedWorkspace,
+      data: deleted,
     };
   } catch (error) {
+    console.log(error);
     return {
       error: true,
       status: StatusCodes.INTERNAL_SERVER_ERROR,
@@ -181,7 +218,6 @@ export const deleteWorkspaceService = async (workspaceName) => {
     };
   }
 };
-
 // ------------------------------------------------------
 // GET ALL WORKSPACE
 // ------------------------------------------------------

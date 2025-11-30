@@ -3,6 +3,6 @@ import { getWorkspaceByJoinCodeController } from "../../controllers/WorkspaceCon
 
 const router = express.Router();
 
-router.get("/", getWorkspaceByJoinCodeController);
+router.get("/:joinCode", getWorkspaceByJoinCodeController);
 
 export default router;

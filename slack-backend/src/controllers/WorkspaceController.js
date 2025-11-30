@@ -67,20 +67,29 @@ export const updateWorkspaceController = async (req, res) => {
 
 export const deleteWorkspaceController = async (req, res) => {
   try {
-    const deletedWorkspace = await deleteWorkspaceService(
-      req.body.workspaceName
+    // expect workspace id in URL param
+    const workspaceId = req.params.workspaceId;
+    const result = await deleteWorkspaceService(
+      workspaceId,
+      req.user.id
     );
-    if (deletedWorkspace?.error) {
-      console.log(deletedWorkspace.message);
-      return res.status(400).json({
-        message: deletedWorkspace.message,
+    console.log(
+      "delete request workspaceId:",
+      workspaceId,
+      "user:",
+      req.user.id
+    );
+
+      if (result?.error) {
+      return res.status(result.status).json({
+        message: result.data.message,
         status: false,
       });
     }
     res.status(200).json({
       message: "Workspace deleted successfully",
       status: true,
-      data: deletedWorkspace,
+      data: result.data,
     });
   } catch (error) {
     return res.status(500).json({
@@ -141,8 +150,9 @@ export const getWorkspaceByNameController = async (req, res) => {
 export const getWorkspaceByJoinCodeController = async (req, res) => {
   try {
     const getWorkspaceByJoinCode = await getWorkspaceByJoinCodeService(
-      req.body.JoinCode
+      req.params.joinCode
     );
+    console.log(getWorkspaceByJoinCode);
     if (getWorkspaceByJoinCode?.error) {
       console.log(getWorkspaceByJoinCode.error);
       return res.status(400).json({
@@ -156,6 +166,7 @@ export const getWorkspaceByJoinCodeController = async (req, res) => {
       data: getWorkspaceByJoinCode,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       message: error.message,
       status: false,

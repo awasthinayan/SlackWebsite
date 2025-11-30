@@ -34,6 +34,17 @@ export const deleteWorkspace = async (workspaceName) => {
   }
 };
 
+export const deleteWorkspaceById = async (workspaceId) => {
+  try {
+    const workspace = await Workspace.findByIdAndDelete(workspaceId);
+    console.log("id in repo", workspaceId);
+    return workspace;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
+
 export const getAllWorkspace = async () => {
   try {
     return await Workspace.find();

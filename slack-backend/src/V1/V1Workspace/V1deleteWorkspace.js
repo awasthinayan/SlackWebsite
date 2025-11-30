@@ -3,6 +3,7 @@ import { deleteWorkspaceController } from "../../controllers/WorkspaceController
 
 const router = express.Router();
 
-router.delete("/", deleteWorkspaceController);
+// DELETE /:workspaceId - delete by workspace id (params)
+router.delete("/:workspaceId", deleteWorkspaceController);
 
 export default router;
