@@ -7,6 +7,11 @@ const ChannelSchema = new mongoose.Schema(
       required: [true, "Channel name is required"],
       unique: true,
     },
+    workspaceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Workspace",
+      required: [true, "Workspace id is required"],
+    },
     createdAt: {
       type: Date,
       default: Date.now,

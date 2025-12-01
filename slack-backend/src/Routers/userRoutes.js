@@ -9,7 +9,17 @@ import { SignUpSchema } from "../ZodValidation/SignUpSchema.js";
 import { validate } from "../ZodValidation/Validate.js";
 import V1getAllUsers from "../V1/V1Auth/V1getAllUsers.js";
 import V1updateUser from "../V1/V1Auth/V1updateUser.js";
-import {workspaceSchemaVaildation, CheckMemberSchemaValidation, CheckChannelSchemaValidation} from "../ZodValidation/WorkspaceSchema.js";
+import {
+  workspaceSchemaVaildation,
+  CheckMemberSchemaValidation,
+  CheckChannelSchemaValidation,
+} from "../ZodValidation/WorkspaceSchema.js";
+import authMiddleware from "../Middleware/authMiddleware.js";
+
+//ALl the channel imports
+
+import V1CreateChannel from "../V1/V1Channel/V1CreateChannel.js";
+import V1getAllChannel from "../V1/V1Channel/V1getAllChannel.js";
 
 // All the workspaces imports
 
@@ -22,10 +32,10 @@ import V1getWorkspaceByJoinCode from "../V1/V1Workspace/V1getWorkspaceByJoinCode
 import V1addMemberToWorkspace from "../V1/V1Workspace/V1addMemberToWorkspace.js";
 import V1addChannelToWorkspace from "../V1/V1Workspace/V1addChannelToWorkspace.js";
 import V1fetchAllWorkspaceByMemberId from "../V1/V1Workspace/V1fetchAllWorkspaceByMemberId.js";
-import authMiddleware from "../Middleware/authMiddleware.js";
-import { check } from "zod";
 
 const router = express.Router();
+
+// All the user routes
 
 router.use("/V1/signup", validate(SignUpSchema), V1userSignUp);
 router.use("/V1/signin", validate(SignInSchema), V1userSignIn);
@@ -44,36 +54,46 @@ router.use(
   "/V1/workspaces/createWorkspace",
   authMiddleware,
   validate(workspaceSchemaVaildation),
-  V1CreateWorkspace,
+  V1CreateWorkspace
 );
 router.use(
   "/V1/workspaces/updateWorkspace/:id",
   authMiddleware,
   validate(workspaceSchemaVaildation),
-  V1updateWorkspace,
+  V1updateWorkspace
 );
+router.use("/V1/workspaces/deleteWorkspace", authMiddleware, V1deletWorkspace);
 router.use(
-  "/V1/workspaces/deleteWorkspace",
+  "/V1/workspaces/getAllWorkspace",
   authMiddleware,
-  V1deletWorkspace,
+  V1getAllWorkspaces
 );
-router.use("/V1/workspaces/getAllWorkspace",authMiddleware, V1getAllWorkspaces);
 
 router.use("/V1/workspaces/getWorkspaceByName", V1getWorkspaceByName);
-router.use("/V1/workspaces/getWorkspaceByJoinCode", authMiddleware,V1getWorkspaceByJoinCode);
+router.use(
+  "/V1/workspaces/getWorkspaceByJoinCode",
+  authMiddleware,
+  V1getWorkspaceByJoinCode
+);
 router.use(
   "/V1/workspaces/addMemberToWorkspace",
   validate(CheckMemberSchemaValidation),
-  V1addMemberToWorkspace,
+  V1addMemberToWorkspace
 );
 router.use(
   "/V1/workspaces/addChannelToWorkspace",
   validate(CheckChannelSchemaValidation),
   authMiddleware,
-  V1addChannelToWorkspace,
+  V1addChannelToWorkspace
 );
 router.use(
   "/V1/workspaces/fetchAllWorkspaceByMemberId",
-  V1fetchAllWorkspaceByMemberId,
+  V1fetchAllWorkspaceByMemberId
 );
+
+// All the channel routes
+
+router.use("/V1/channel/createChannel", authMiddleware, V1CreateChannel);
+router.use("/V1/channel/getAllChannel", V1getAllChannel);
+
 export default router;
