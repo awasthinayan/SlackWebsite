@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const workspaceSchema = z.object({
+export const workspaceSchemaVaildation = z.object({
   workspaceName: z.string().min(3).max(30).optional(),
   description: z.string().min(3).max(100).optional(),
 
@@ -24,4 +24,13 @@ const workspaceSchema = z.object({
     .optional(),
 });
 
-export default workspaceSchema;
+
+
+export const CheckMemberSchemaValidation = z.object({
+  memberId: z.string().min(3).max(30),
+  role: z.string().min(3).max(30).optional(),
+});
+
+export const CheckChannelSchemaValidation = z.object({
+  channelId: z.string().min(3).max(30),
+});

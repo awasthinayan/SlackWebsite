@@ -368,11 +368,9 @@ export const addMemberToWorkspaceService = async (
 // ------------------------------------------------------
 export const addChannelToWorkspaceService = async (
   workspaceName,
-  channelName
+  channelId
 ) => {
   try {
-    const addChannel = await addChannelToWorkspace(workspaceName, channelName);
-
     const workspace = await getWorkspaceByName(workspaceName);
 
     // check if the workspace is already exist or not
@@ -384,8 +382,10 @@ export const addChannelToWorkspaceService = async (
       };
     }
 
-    // chekc if the channel is already exist or not
-    const alreadyChannel = addChannel.channels.find((c) => c === channelName);
+    // check if the channelId is already exist or not
+    const alreadyChannel = workspace.channels.some((c) => String(c) === channelId);
+    console.log("alreadyChannel", alreadyChannel);
+    console.log("channelId", channelId);
 
     if (alreadyChannel) {
       return {
@@ -394,6 +394,7 @@ export const addChannelToWorkspaceService = async (
         data: { message: "Channel already exists", data: null },
       };
     }
+    const addChannel = await addChannelToWorkspace(workspaceName, channelId);
     return {
       error: false,
       status: StatusCodes.OK,

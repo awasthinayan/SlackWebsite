@@ -9,7 +9,7 @@ import { SignUpSchema } from "../ZodValidation/SignUpSchema.js";
 import { validate } from "../ZodValidation/Validate.js";
 import V1getAllUsers from "../V1/V1Auth/V1getAllUsers.js";
 import V1updateUser from "../V1/V1Auth/V1updateUser.js";
-import WorkspaceSchema from "../ZodValidation/WorkspaceSchema.js";
+import {workspaceSchemaVaildation, CheckMemberSchemaValidation, CheckChannelSchemaValidation} from "../ZodValidation/WorkspaceSchema.js";
 
 // All the workspaces imports
 
@@ -23,6 +23,7 @@ import V1addMemberToWorkspace from "../V1/V1Workspace/V1addMemberToWorkspace.js"
 import V1addChannelToWorkspace from "../V1/V1Workspace/V1addChannelToWorkspace.js";
 import V1fetchAllWorkspaceByMemberId from "../V1/V1Workspace/V1fetchAllWorkspaceByMemberId.js";
 import authMiddleware from "../Middleware/authMiddleware.js";
+import { check } from "zod";
 
 const router = express.Router();
 
@@ -42,13 +43,13 @@ router.use("/V1/resetPassword", V1resetPassword);
 router.use(
   "/V1/workspaces/createWorkspace",
   authMiddleware,
-  validate(WorkspaceSchema),
+  validate(workspaceSchemaVaildation),
   V1CreateWorkspace,
 );
 router.use(
   "/V1/workspaces/updateWorkspace/:id",
   authMiddleware,
-  validate(WorkspaceSchema),
+  validate(workspaceSchemaVaildation),
   V1updateWorkspace,
 );
 router.use(
@@ -62,12 +63,13 @@ router.use("/V1/workspaces/getWorkspaceByName", V1getWorkspaceByName);
 router.use("/V1/workspaces/getWorkspaceByJoinCode", authMiddleware,V1getWorkspaceByJoinCode);
 router.use(
   "/V1/workspaces/addMemberToWorkspace",
-  validate(WorkspaceSchema),
+  validate(CheckMemberSchemaValidation),
   V1addMemberToWorkspace,
 );
 router.use(
   "/V1/workspaces/addChannelToWorkspace",
-  validate(WorkspaceSchema),
+  validate(CheckChannelSchemaValidation),
+  authMiddleware,
   V1addChannelToWorkspace,
 );
 router.use(

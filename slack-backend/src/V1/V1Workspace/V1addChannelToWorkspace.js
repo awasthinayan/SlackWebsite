@@ -3,6 +3,6 @@ import { addChannelToWorkspaceController } from "../../controllers/WorkspaceCont
 
 const router = express.Router();
 
-router.post("/", addChannelToWorkspaceController);
+router.put("/", addChannelToWorkspaceController);
 
 export default router;

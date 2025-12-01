@@ -184,10 +184,9 @@ export const addChannelToWorkspace = async (workspaceName, channelId) => {
     } catch (e) {
       chId = channelId;
     }
-
-    return await Workspace.findOneAndUpdate(
+  return await Workspace.findOneAndUpdate(
       { workspaceName },
-      { $push: { channels: chId } },
+      { $addToSet: { channels: chId } }, // prevents duplicates
       { new: true }
     ).populate("channels");
   } catch (error) {

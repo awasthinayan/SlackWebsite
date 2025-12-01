@@ -69,10 +69,7 @@ export const deleteWorkspaceController = async (req, res) => {
   try {
     // expect workspace id in URL param
     const workspaceId = req.params.workspaceId;
-    const result = await deleteWorkspaceService(
-      workspaceId,
-      req.user.id
-    );
+    const result = await deleteWorkspaceService(workspaceId, req.user.id);
     console.log(
       "delete request workspaceId:",
       workspaceId,
@@ -80,7 +77,7 @@ export const deleteWorkspaceController = async (req, res) => {
       req.user.id
     );
 
-      if (result?.error) {
+    if (result?.error) {
       return res.status(result.status).json({
         message: result.data.message,
         status: false,
@@ -150,9 +147,8 @@ export const getWorkspaceByNameController = async (req, res) => {
 export const getWorkspaceByJoinCodeController = async (req, res) => {
   try {
     const getWorkspaceByJoinCode = await getWorkspaceByJoinCodeService(
-      req.params.joinCode
+      req.body.JoinCode
     );
-    console.log(getWorkspaceByJoinCode);
     if (getWorkspaceByJoinCode?.error) {
       console.log(getWorkspaceByJoinCode.error);
       return res.status(400).json({
@@ -166,7 +162,6 @@ export const getWorkspaceByJoinCodeController = async (req, res) => {
       data: getWorkspaceByJoinCode,
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       message: error.message,
       status: false,
@@ -203,26 +198,34 @@ export const addMemberToWorkspaceController = async (req, res) => {
 
 export const addChannelToWorkspaceController = async (req, res) => {
   try {
-    const addChannelSpace = await addChannelToWorkspaceService(
+    const result = await addChannelToWorkspaceService(
       req.body.workspaceName,
-      req.body.channelName
+      req.body.channelId
     );
-    if (addChannelSpace?.error) {
-      console.log(addChannelSpace.error);
-      return res.status(400).json({
-        message: addChannelSpace.error,
+    // console.log("result", result);
+    // console.log("result.error", result.error);
+    // console.log("result.message", result.message);
+    // console.log("name in controller", req.params.workspaceName);
+    // console.log("channelId in controller", req.body.channelId);
+      
+    if (result.error) {
+      return res.status(result.status).json({
         status: false,
+        message: result.message,
+        data: result.data,
       });
     }
-    res.status(200).json({
-      message: "Channel added successfully",
+
+    return res.status(200).json({
       status: true,
-      data: addChannelSpace,
+      message: "Channel added successfully",
+      data: result.data,
     });
+
   } catch (error) {
     return res.status(500).json({
-      message: error.message,
       status: false,
+      message: error.message,
     });
   }
 };
