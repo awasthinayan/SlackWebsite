@@ -172,7 +172,7 @@ export const getWorkspaceByJoinCodeController = async (req, res) => {
 export const addMemberToWorkspaceController = async (req, res) => {
   try {
     const addMemberSpace = await addMemberToWorkspaceService(
-      req.body.workspaceId,
+      req.params.workspaceId,
       req.body.memberId,
       req.body.role
     );

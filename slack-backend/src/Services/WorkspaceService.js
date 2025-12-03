@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { v4 as uuidv4 } from "uuid";
+import { addEmailtoMailQueue } from "../Producer/mailQueueProducer.js";
 
 import {
   createWorkspace,
@@ -9,13 +10,14 @@ import {
   getAllWorkspace,
   getWorkspaceByName,
   getWorkspaceByJoinCode,
-  addMemberToWorkspace,
   addChannelToWorkspace,
   fetchAllWorkspaceByMemberId,
   getWorkspaceById,
+  addMemberToWorkspaceRepo,
 } from "../RepoLayer/WorkspaceRepo.js";
 import { createChannel } from "../RepoLayer/ChannelRepo.js";
 import user from "../DBLayer/userSchema.js";
+import { workspacebyJoinMailObject } from "../common/mailObject.js";
 
 // ------------------------------------------------------
 // CREATE WORKSPACE
@@ -57,7 +59,7 @@ export const createWorkspaceService = async (
     }
 
     // STEP 2 → Add admin member
-    const updatedWorkspace = await addMemberToWorkspace(
+    const updatedWorkspace = await addMemberToWorkspaceRepo(
       workspace._id,
       memberId,
       "admin"
@@ -72,7 +74,9 @@ export const createWorkspaceService = async (
     }
 
     // STEP 3 → Create default channel "general"
-    const channel = await createChannel("general", workspaceName);
+    const channel = await createChannel("general", workspace._id);
+    console.log("channel", channel);
+    console.log("workspaceId", workspace._id);
 
     if (!channel) {
       return {
@@ -315,7 +319,15 @@ export const addMemberToWorkspaceService = async (
   role
 ) => {
   try {
+    console.log("🟦 SERVICE START");
+    console.log("📌 workspaceId:", workspaceId);
+    console.log("📌 memberId:", memberId);
+    console.log("📌 role:", role);
+
+    // Fetch workspace
     const workspace = await getWorkspaceById(workspaceId);
+    console.log("📂 Workspace fetched:", workspace?._id);
+
     if (!workspace) {
       return {
         error: true,
@@ -323,7 +335,11 @@ export const addMemberToWorkspaceService = async (
         data: { message: "Workspace not found", data: null },
       };
     }
+
+    // Validate user
     const isValidUser = await user.findById(memberId);
+    console.log("👤 User fetched:", isValidUser?._id);
+
     if (!isValidUser) {
       return {
         error: true,
@@ -332,6 +348,7 @@ export const addMemberToWorkspaceService = async (
       };
     }
 
+    // Check if already a member
     const isMember = workspace.members.find(
       (m) => String(m.memberId) === String(memberId)
     );
@@ -344,8 +361,11 @@ export const addMemberToWorkspaceService = async (
       };
     }
 
-    const response = await addMemberToWorkspace(workspaceId, memberId, role);
-    console.log("response", response);
+    // Call Repo Layer
+    console.log("🛠 Calling addMemberToWorkspaceRepo...");
+    const response = await addMemberToWorkspaceRepo(workspaceId, memberId, role);
+    console.log("🟩 Repo Response:", response);
+
     if (!response) {
       return {
         error: true,
@@ -353,8 +373,23 @@ export const addMemberToWorkspaceService = async (
         data: { message: "Server error", data: null },
       };
     }
+
+    // Mail Queue Job
+    console.log("📨 Adding Job To Mail Queue...");
+
+    const mailData = workspacebyJoinMailObject(response);
+
+    const updateresponse = await addEmailtoMailQueue({
+      ...mailData,
+      to: isValidUser.email,
+    });
+
+    console.log("📮 Mail Queue Job Created:", updateresponse);
+
     return response;
   } catch (error) {
+    console.error("❌ ERROR in addMemberToWorkspaceService:", error);
+
     return {
       error: true,
       status: StatusCodes.INTERNAL_SERVER_ERROR,
@@ -362,6 +397,7 @@ export const addMemberToWorkspaceService = async (
     };
   }
 };
+
 
 // ------------------------------------------------------
 // ADD CHANNEL
@@ -383,7 +419,9 @@ export const addChannelToWorkspaceService = async (
     }
 
     // check if the channelId is already exist or not
-    const alreadyChannel = workspace.channels.some((c) => String(c) === channelId);
+    const alreadyChannel = workspace.channels.some(
+      (c) => String(c) === channelId
+    );
     console.log("alreadyChannel", alreadyChannel);
     console.log("channelId", channelId);
 

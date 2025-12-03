@@ -112,9 +112,13 @@ export const fetchAllWorkspaceByMemberId = async (memberId) => {
   }
 };
 
-export const addMemberToWorkspace = async (workspaceId, memberId, role) => {
+export const addMemberToWorkspaceRepo = async (workspaceId, memberId, role) => {
   try {
     const workspace = await Workspace.findById(workspaceId);
+    console.log("📂 Workspace fetched:", workspace?._id);
+    console.log("👤 Member fetched:", memberId);
+    console.log("👤 Role:", role);
+    console.log("workspace is", workspace);
 
     if (!workspace) {
       return {
@@ -126,6 +130,8 @@ export const addMemberToWorkspace = async (workspaceId, memberId, role) => {
 
     // findById accepts the id value (string or ObjectId) directly
     const isValidUser = await user.findById(memberId);
+    console.log("👤 User fetched:", isValidUser?._id);
+    console.log("👤 User fetched:", isValidUser);
 
     if (!isValidUser) {
       return {
@@ -164,9 +170,14 @@ export const addMemberToWorkspace = async (workspaceId, memberId, role) => {
       }
     })();
 
+    console.log("👤 MemberId pushed:", toPushMemberId);
+
     workspace.members.push({ memberId: toPushMemberId, role });
 
     await workspace.save();
+
+    console.log("📂 Workspace updated:", workspace?._id);
+    console.log("📂 Workspace updated:", workspace);
 
     return workspace;
   } catch (error) {
@@ -174,6 +185,7 @@ export const addMemberToWorkspace = async (workspaceId, memberId, role) => {
     return null;
   }
 };
+
 
 export const addChannelToWorkspace = async (workspaceName, channelId) => {
   try {

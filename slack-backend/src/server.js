@@ -4,13 +4,14 @@ import dotenv from "dotenv";
 import connectDB from "./config/dbConfig.js";
 import cors from "cors";
 import bodyParser from "body-parser";
+import { PORT } from "./config/serverConfig.js";
 
 dotenv.config();
 
-const server = express();
-const PORT = process.env.PORT || 3000;
+const app = express();
 
-server.use(
+
+app.use(
   cors({
     origin: "*",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -20,15 +21,17 @@ server.use(
 
 connectDB();
 
-server.use(express.json());
-server.use(express.urlencoded({ extended: true }));
-server.use(bodyParser.json());
-server.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-server.use("/api", router);
+app.use("/api", router);
 
-server.get("/", (req, res) => {
+app.get("/", (req, res) => {
   res.send("Hello world Home");
 });
 
-server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, async () => {
+  console.log(`🚀 Server running on port ${PORT}`) 
+});
