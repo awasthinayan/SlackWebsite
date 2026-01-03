@@ -366,6 +366,10 @@ export const addMemberToWorkspaceService = async (
     const response = await addMemberToWorkspaceRepo(workspaceId, memberId, role);
     console.log("🟩 Repo Response:", response);
 
+    if(response?.error){
+      return response;
+    }
+
     if (!response) {
       return {
         error: true,
@@ -378,6 +382,13 @@ export const addMemberToWorkspaceService = async (
     console.log("📨 Adding Job To Mail Queue...");
 
     const mailData = workspacebyJoinMailObject(response);
+
+    console.log('====================================');
+
+    console.log("🧪 FULL RESPONSE OBJECT:", JSON.stringify(response, null, 2));
+
+    console.log('====================================');
+    
 
     const updateresponse = await addEmailtoMailQueue({
       ...mailData,

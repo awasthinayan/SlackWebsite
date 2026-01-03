@@ -7,6 +7,8 @@ export default nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
     secure: true,
+    auth: {
     user: MAIL_ID,
     pass: MAIL_PASSWORD
+  }
 });
