@@ -14,7 +14,6 @@ export const getAllUsers = async () => {
 };
 
 export const getuserbyId = async (id) => {
-  console.log("id in repo", id);
   return await user.findOne({ _id: id });
 };
 

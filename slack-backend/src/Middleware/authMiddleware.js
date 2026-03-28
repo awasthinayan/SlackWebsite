@@ -24,6 +24,8 @@ export default async function authMiddleware(req, res, next) {
       });
     }
     req.user = response;
+
+    console.log("user in authMiddleware", req.user);
     next();
   } catch (error) {
     res.status(400).json({

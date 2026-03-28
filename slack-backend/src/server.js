@@ -6,11 +6,20 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import { PORT } from "./config/serverConfig.js";
 import bullserverAdapter from "./config/BullBoardConfig.js";
-
+import {Server} from "socket.io";
+import {createServer} from "http";
 
 dotenv.config();
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
 
 app.use(
   cors({
@@ -35,6 +44,18 @@ app.get("/", (req, res) => {
   res.send("Hello world Home");
 });
 
-app.listen(PORT, async () => {
+
+io.on('connection', (socket) => {
+  console.log('a user connected', socket.id);
+
+// socket.on('messageFromClient', (data) => {
+//   console.log('message from client', data);
+
+//   io.emit('new message', data.toUpperCase());
+// });
+
+});
+
+server.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`) 
 });

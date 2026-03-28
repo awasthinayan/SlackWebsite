@@ -5,7 +5,6 @@ import { addEmailtoMailQueue } from "../Producer/mailQueueProducer.js";
 import {
   createWorkspace,
   updateWorkpace,
-  deleteWorkspace,
   deleteWorkspaceById,
   getAllWorkspace,
   getWorkspaceByName,
@@ -486,3 +485,4 @@ export const fetchAllWorkspaceByMemberIdService = async (userId) => {
     };
   }
 };
+

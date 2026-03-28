@@ -218,3 +218,26 @@ export const getWorkspaceById = async (workspaceId) => {
     return error;
   }
 };
+
+export const isUserisPartofWorkspace = async (workspaceId, memberId) => {
+  try {
+    const workspace = await Workspace.findById(workspaceId);
+
+    if (!workspace) {
+      return { error: true, status: 404, message: "Workspace not found" };
+    }
+
+    const isMember = workspace.members.some(
+      (m) => String(m.memberId) === String(memberId)
+    );
+
+    return {
+      error: false,
+      status: 200,
+      isMember,
+    };
+  } catch (error) {
+    console.log(error);
+    return { error: true, status: 500, message: "Server error" };
+  }
+};
