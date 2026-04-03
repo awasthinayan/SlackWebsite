@@ -6,6 +6,11 @@ import V1verifyOTP from "../V1/V1Auth/V1verifyOTP.js";
 import V1resetPassword from "../V1/V1Auth/V1resetPassword.js";
 import { SignInSchema } from "../ZodValidation/SignInSchema.js";
 import { SignUpSchema } from "../ZodValidation/SignUpSchema.js";
+import {
+  ForgotPasswordEmailSchema,
+  ResetPasswordSchema,
+  VerifyOTPSchema,
+} from "../ZodValidation/ForgotPasswordSchema.js";
 import { validate } from "../ZodValidation/Validate.js";
 import V1getAllUsers from "../V1/V1Auth/V1getAllUsers.js";
 import V1updateUser from "../V1/V1Auth/V1updateUser.js";
@@ -32,6 +37,7 @@ import V1getWorkspaceByJoinCode from "../V1/V1Workspace/V1getWorkspaceByJoinCode
 import V1addMemberToWorkspace from "../V1/V1Workspace/V1addMemberToWorkspace.js";
 import V1addChannelToWorkspace from "../V1/V1Workspace/V1addChannelToWorkspace.js";
 import V1fetchAllWorkspaceByMemberId from "../V1/V1Workspace/V1fetchAllWorkspaceByMemberId.js";
+import V1getWorkspaceDetails from "../V1/V1Workspace/V1getWorkspaceDetails.js";
 
 
 // All the member routes
@@ -42,59 +48,60 @@ const router = express.Router();
 
 // All the user routes
 
-router.use("/V1/signup", validate(SignUpSchema), V1userSignUp);
-router.use("/V1/signin", validate(SignInSchema), V1userSignIn);
+router.use("/signup", validate(SignUpSchema), V1userSignUp);
+router.use("/signin", validate(SignInSchema), V1userSignIn);
 
-router.use("/V1/allUsers", V1getAllUsers);
+router.use("/allUsers", V1getAllUsers);
 
-router.use("/V1", V1updateUser);
+router.use("/update", V1updateUser);
 
-router.use("/V1/sendOTP", V1sendOTP);
-router.use("/V1/verifyOTP", V1verifyOTP);
-router.use("/V1/resetPassword", V1resetPassword);
+router.use("/sendOTP", validate(ForgotPasswordEmailSchema), V1sendOTP);
+router.use("/verifyOTP", validate(VerifyOTPSchema), V1verifyOTP);
+router.use("/resetPassword", validate(ResetPasswordSchema), V1resetPassword);
 
 // ALl the workspaces routes
 
 router.use(
-  "/V1/workspaces/createWorkspace",
+  "/workspaces/createWorkspace",
   authMiddleware,
   validate(workspaceSchemaVaildation),
   V1CreateWorkspace
 );
 router.use(
-  "/V1/workspaces/updateWorkspace/:id",
+  "/workspaces/updateWorkspace/:id",
   authMiddleware,
   validate(workspaceSchemaVaildation),
   V1updateWorkspace
 );
-router.use("/V1/workspaces/deleteWorkspace", authMiddleware, V1deletWorkspace);
+router.use("/workspaces/deleteWorkspace", authMiddleware, V1deletWorkspace);
 router.use(
-  "/V1/workspaces/getAllWorkspace",
+  "/workspaces/getAllWorkspace",
   authMiddleware,
   V1getAllWorkspaces
 );
 
-router.use("/V1/workspaces/getWorkspaceByName", V1getWorkspaceByName);
+router.use("/workspaces/getWorkspaceByName", V1getWorkspaceByName);
 router.use(
-  "/V1/workspaces/getWorkspaceByJoinCode",
+  "/workspaces/getWorkspaceByJoinCode",
   authMiddleware,
   V1getWorkspaceByJoinCode
 );
 router.use(
-  "/V1/workspaces/addMemberToWorkspace",
+  "/workspaces/addMemberToWorkspace",
   validate(CheckMemberSchemaValidation),
   V1addMemberToWorkspace
 );
 router.use(
-  "/V1/workspaces/addChannelToWorkspace",
+  "/workspaces/addChannelToWorkspace",
   validate(CheckChannelSchemaValidation),
   authMiddleware,
   V1addChannelToWorkspace
 );
 router.use(
-  "/V1/workspaces/fetchAllWorkspaceByMemberId",
+  "/workspaces/fetchAllWorkspaceByMemberId",
   V1fetchAllWorkspaceByMemberId
 );
+router.use("/workspaces/:workspaceId", authMiddleware, V1getWorkspaceDetails);
 
 // All the channel routes
 

@@ -17,28 +17,6 @@ const userSchema = new mongoose.Schema(
       unique: true,
       match: [/^\S+@\S+\.\S+$/, "Please provide a valid email address"],
     },
-    name: {
-      type: String,
-      required: true,
-    },
-    phone: {
-      type: String,
-      required: true,
-      match: [/^\d{10}$/, "Please enter a valid 10-digit phone number"],
-    },
-
-    address: {
-      type: String,
-      required: true,
-    },
-    gender: {
-      type: String,
-      required: true,
-    },
-    dob: {
-      type: Date,
-      required: true,
-    },
     otp: {
       type: String,
     },

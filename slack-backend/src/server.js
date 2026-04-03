@@ -1,4 +1,4 @@
-import router from "./Routers/userRoutes.js";
+import router from "./Routers/AllRoutes.js";
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./config/dbConfig.js";
@@ -15,8 +15,8 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
   }
 });
 
@@ -38,7 +38,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/Ui', bullserverAdapter.getRouter());
 
-app.use("/api", router);
+app.use("/api/v1", router);
 
 app.get("/", (req, res) => {
   res.send("Hello world Home");

@@ -8,6 +8,7 @@ import {
   addChannelToWorkspaceService,
   fetchAllWorkspaceByMemberIdService,
   getAllWorkspaceService,
+  getWorkspaceDetailsService,
 } from "../Services/WorkspaceService.js";
 
 export const createWorkspaceController = async (req, res) => {
@@ -110,6 +111,30 @@ export const getAllWorkspaceController = async (req, res) => {
       message: "All workspaces fetched successfully",
       status: true,
       data: getWorkspaces,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+      status: false,
+    });
+  }
+};
+
+export const getWorkspaceDetailsController = async (req, res) => {
+  try {
+    const result = await getWorkspaceDetailsService(req.params.workspaceId);
+
+    if (result?.error) {
+      return res.status(result.status).json({
+        message: result.data.message,
+        status: false,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Workspace details fetched successfully",
+      status: true,
+      data: result.data,
     });
   } catch (error) {
     return res.status(500).json({
@@ -237,8 +262,8 @@ export const fetchAllWorkspaceByMemberIdController = async (req, res) => {
 
     if (result?.error) {
       console.log(result.message);
-      return res.status(400).json({
-        message: result.message,
+      return res.status(result.status || 500).json({
+        message: result.message || result?.data?.message,
         status: false,
       });
     }

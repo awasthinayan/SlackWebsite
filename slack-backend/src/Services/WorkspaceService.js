@@ -252,6 +252,47 @@ export const getAllWorkspaceService = async () => {
 };
 
 // ------------------------------------------------------
+// GET WORKSPACE DETAILS BY ID
+// ------------------------------------------------------
+export const getWorkspaceDetailsService = async (workspaceId) => {
+  try {
+    if (
+      !workspaceId ||
+      typeof workspaceId !== "string" ||
+      !/^[0-9a-fA-F]{24}$/.test(workspaceId)
+    ) {
+      return {
+        error: true,
+        status: StatusCodes.BAD_REQUEST,
+        data: { message: "Invalid workspace id", data: null },
+      };
+    }
+
+    const workspace = await getWorkspaceById(workspaceId);
+
+    if (!workspace) {
+      return {
+        error: true,
+        status: StatusCodes.NOT_FOUND,
+        data: { message: "Workspace not found", data: null },
+      };
+    }
+
+    return {
+      error: false,
+      status: StatusCodes.OK,
+      data: workspace,
+    };
+  } catch (error) {
+    return {
+      error: true,
+      status: StatusCodes.INTERNAL_SERVER_ERROR,
+      data: { message: "Server error", data: null },
+    };
+  }
+};
+
+// ------------------------------------------------------
 // GET WORKSPACE BY NAME
 // ------------------------------------------------------
 export const getWorkspaceByNameService = async (workspaceName) => {
@@ -463,12 +504,11 @@ export const fetchAllWorkspaceByMemberIdService = async (userId) => {
     const response = await fetchAllWorkspaceByMemberId(userId);
     console.log("id in service", userId);
 
-    // if no workspace is found
-    if (!response || response.length === 0) {
+    if (!response) {
       return {
         error: true,
-        status: StatusCodes.NOT_FOUND,
-        data: { message: "Workspace not found", data: null },
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        data: { message: "Failed to fetch workspaces", data: null },
       };
     }
 
@@ -485,4 +525,3 @@ export const fetchAllWorkspaceByMemberIdService = async (userId) => {
     };
   }
 };
-

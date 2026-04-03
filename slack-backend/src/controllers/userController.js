@@ -137,13 +137,15 @@ export const sendOTPController = async (req, res) => {
     const result = await sendOtpViaBrevoService(email);
 
     if (result.success) {
-      return res.status(200).json({ message: "OTP sent successfully" });
+      return res.status(200).json({ message: result.message, status: true });
     } else {
-      return res.status(400).json({ message: "Failed to send OTP" });
+      return res
+        .status(400)
+        .json({ message: result.message || "Failed to send OTP", status: false });
     }
   } catch (error) {
     console.error("Error in sendOTPController:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: "Internal Server Error", status: false });
   }
 };
 
@@ -151,10 +153,10 @@ export const verifyOTPController = async (req, res) => {
   try {
     const { email, otp } = req.body;
     const result = await verifyOTPService(email, otp);
-    res.status(200).json(result);
+    res.status(200).json({ ...result, status: true });
   } catch (error) {
     console.log(error);
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: error.message, status: false });
   }
 };
 
@@ -162,8 +164,8 @@ export const resetPasswordController = async (req, res) => {
   try {
     const { email, password } = req.body;
     const result = await resetPasswordService(email, password);
-    res.status(200).json(result);
+    res.status(200).json({ ...result, status: true });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: error.message, status: false });
   }
 };

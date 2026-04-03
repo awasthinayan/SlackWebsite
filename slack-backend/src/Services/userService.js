@@ -19,17 +19,12 @@ export const registerUserService = async (userData) => {
   try {
     // some validation in server side
 
-    const { email, password, username, name, phone, address, gender, dob } =
+    const { email, password, username } =
       userData;
     if (
       !email ||
       !password ||
-      !username ||
-      !name ||
-      !phone ||
-      !address ||
-      !gender ||
-      !dob
+      !username 
     ) {
       return { error: "Please fill all the fields" };
     }
@@ -149,9 +144,16 @@ export const checkifUserexistService = async (email) => {
 
 export const sendOtpViaBrevoService = async (email) => {
   try {
+    const existingUser = await getuserbyEmail(email);
+
+    if (!existingUser) {
+      return { success: false, message: "User not found" };
+    }
+
     // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     console.log(otp);
+
     // Save OTP in DB via Repo
     await saveOTP(email, otp);
 
@@ -167,6 +169,10 @@ export const sendOtpViaBrevoService = async (email) => {
 };
 
 export const verifyOTPService = async (email, otp) => {
+  if (!email || !otp) {
+    throw new Error("Email and OTP are required");
+  }
+
   const existingUser = await verifyOTP(email, otp);
   if (!existingUser) throw new Error("Invalid or expired OTP");
   console.log(existingUser);
@@ -174,6 +180,15 @@ export const verifyOTPService = async (email, otp) => {
 };
 
 export const resetPasswordService = async (email, password) => {
+  if (!email || !password) {
+    throw new Error("Email and password are required");
+  }
+
+  const existingUser = await getuserbyEmail(email);
+  if (!existingUser) {
+    throw new Error("User not found");
+  }
+
   const hashedPassword = await bcrypt.hash(password, 10);
   await updateUserPassword(email, hashedPassword);
   return { message: "Password reset successful" };
