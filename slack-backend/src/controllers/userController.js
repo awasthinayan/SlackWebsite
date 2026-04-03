@@ -1,3 +1,4 @@
+import user from "../DBLayer/userSchema.js";
 import {
   registerUserService,
   loginUserService,
@@ -39,7 +40,7 @@ export const registerUserController = async (req, res) => {
 
 export const loginUserController = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password } = req.body;
 
     // Validate input
     if (!email || !password) {
@@ -61,7 +62,7 @@ export const loginUserController = async (req, res) => {
     return res.status(200).json({
       message: "User logged in successfully",
       status: true,
-      token,
+      data: token,
     });
   } catch (error) {
     return res.status(500).json({

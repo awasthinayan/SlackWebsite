@@ -40,11 +40,6 @@ export const registerUserService = async (userData) => {
       username: userData.username,
       password: hashedPassword,
       email: userData.email,
-      name: userData.name,
-      phone: userData.phone,
-      address: userData.address,
-      gender: userData.gender,
-      dob: userData.dob,
     });
 
     return newUser;
@@ -67,11 +62,15 @@ export const loginUserService = async ({ email, password }) => {
 
     // Generate token using role from database ONLY
     const token = generateToken({
-      id: user.id,
+      _id: user.id,
       email: user.email,
     });
 
-    return token;
+    return {
+      token,
+      _id:user.id,
+      email: user.email,
+    };
   } catch (error) {
     console.log(error);
     return { error: error.message };

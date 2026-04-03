@@ -13,7 +13,7 @@ export const createWorkspace = async (workspaceName, description, JoinCode) => {
 
 export const updateWorkpace = async (id, workspaceName, description) => {
   try {
-    const updateWorskpace = await Workspace.findOneAndUpdate(
+    const updateWorskpace = await Workspace.findByIdAndUpdate(
       id,
       { $set: { workspaceName, description } },
       { new: true }
