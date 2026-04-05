@@ -27,6 +27,7 @@ export const createWorkspaceService = async (
   description,
   memberId
 ) => {
+  let workspace = null;
   try {
     // generate join code
     const JoinCode = uuidv4().slice(0, 8).toUpperCase();
@@ -43,7 +44,7 @@ export const createWorkspaceService = async (
     }
 
     // STEP 1 → Create workspace
-    const workspace = await createWorkspace(
+    workspace = await createWorkspace(
       workspaceName,
       description,
       JoinCode
@@ -64,7 +65,13 @@ export const createWorkspaceService = async (
       "admin"
     );
     console.log("updatedWorkspace", updatedWorkspace);
+    if (updatedWorkspace?.error) {
+      await deleteWorkspaceById(workspace._id);
+      return updatedWorkspace;
+    }
+
     if (!updatedWorkspace) {
+      await deleteWorkspaceById(workspace._id);
       return {
         error: true,
         status: StatusCodes.INTERNAL_SERVER_ERROR,
@@ -78,6 +85,7 @@ export const createWorkspaceService = async (
     console.log("workspaceId", workspace._id);
 
     if (!channel) {
+      await deleteWorkspaceById(workspace._id);
       return {
         error: true,
         status: StatusCodes.INTERNAL_SERVER_ERROR,
@@ -93,6 +101,7 @@ export const createWorkspaceService = async (
     );
 
     if (!updatedWorkspaceChannels) {
+      await deleteWorkspaceById(workspace._id);
       return {
         error: true,
         status: StatusCodes.INTERNAL_SERVER_ERROR,
@@ -107,6 +116,9 @@ export const createWorkspaceService = async (
     };
   } catch (error) {
     console.log(error);
+    if (workspace?._id) {
+      await deleteWorkspaceById(workspace._id);
+    }
     return {
       error: true,
       status: StatusCodes.INTERNAL_SERVER_ERROR,

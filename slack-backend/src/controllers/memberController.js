@@ -61,7 +61,7 @@ export const deleteMemberController = async (req, res) => {
     const user = await deleteMemberService(
       req.params.workspaceId,
       req.body.memberId,
-      req.user.id
+      req.user._id
     );
 
     return res.status(200).json({

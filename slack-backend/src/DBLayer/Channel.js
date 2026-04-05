@@ -5,7 +5,6 @@ const ChannelSchema = new mongoose.Schema(
     ChannelName: {
       type: String,
       required: [true, "Channel name is required"],
-      unique: true,
     },
     workspaceId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -23,6 +22,8 @@ const ChannelSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+ChannelSchema.index({ workspaceId: 1, ChannelName: 1 }, { unique: true });
 
 const Channel = mongoose.model("Channel", ChannelSchema);
 

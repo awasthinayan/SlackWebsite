@@ -105,8 +105,8 @@ router.use("/workspaces/:workspaceId", authMiddleware, V1getWorkspaceDetails);
 
 // All the channel routes
 
-router.use("/V1/channel/createChannel", authMiddleware, V1CreateChannel);
-router.use("/V1/channel/getAllChannel", V1getAllChannel);
+router.use("/channel/createChannel", authMiddleware, V1CreateChannel);
+router.use("/channel/getAllChannel", V1getAllChannel);
 
 
 // All the member routes

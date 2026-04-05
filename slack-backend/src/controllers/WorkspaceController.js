@@ -16,7 +16,7 @@ export const createWorkspaceController = async (req, res) => {
     const Createworkspace = await createWorkspaceService(
       req.body.workspaceName,
       req.body.description,
-      req.user?.id
+      req.user?._id
     );
     if (Createworkspace?.error) {
       console.log(Createworkspace.message);
@@ -70,12 +70,12 @@ export const deleteWorkspaceController = async (req, res) => {
   try {
     // expect workspace id in URL param
     const workspaceId = req.params.workspaceId;
-    const result = await deleteWorkspaceService(workspaceId, req.user.id);
+    const result = await deleteWorkspaceService(workspaceId, req.user._id);
     console.log(
       "delete request workspaceId:",
       workspaceId,
       "user:",
-      req.user.id
+      req.user._id
     );
 
     if (result?.error) {
@@ -257,8 +257,8 @@ export const addChannelToWorkspaceController = async (req, res) => {
 
 export const fetchAllWorkspaceByMemberIdController = async (req, res) => {
   try {
-    const result = await fetchAllWorkspaceByMemberIdService(req.user.id);
-    console.log("id in controller", req.user.id);
+    const result = await fetchAllWorkspaceByMemberIdService(req.user._id);
+    console.log("id in controller", req.user._id);
 
     if (result?.error) {
       console.log(result.message);

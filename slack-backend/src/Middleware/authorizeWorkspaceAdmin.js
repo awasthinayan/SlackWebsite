@@ -3,7 +3,7 @@ import { getWorkspaceById } from "../RepoLayer/WorkspaceRepo.js";
 export const authorizeWorkspaceOwner = async (req, res, next) => {
   try {
     const { workspaceId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user._id;
 
     console.log("workspaceId in authorize", workspaceId);
     console.log("userId in authorize", userId);

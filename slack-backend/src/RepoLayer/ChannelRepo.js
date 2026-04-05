@@ -28,9 +28,12 @@ export const getChannelwithWorkspaceDetails = async (channelId) => {
   }
 };
 
-export const getChannelByName = async (channelName) => {
+export const getChannelByName = async (channelName, workspaceId) => {
   try {
-    const channel = await Channel.findOne({ ChannelName: channelName });
+    const channel = await Channel.findOne({
+      ChannelName: channelName,
+      workspaceId,
+    });
     return channel;
   } catch (error) {
     console.log(error);

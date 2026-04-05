@@ -9,7 +9,7 @@ export const createChannelController = async (req, res) => {
     const result = await createChannelService(
       req.body.channelName,
       req.body.workspaceId,
-      req.body.memberId
+      req.body.memberId || req.user?._id
     );
     console.log(result);
 

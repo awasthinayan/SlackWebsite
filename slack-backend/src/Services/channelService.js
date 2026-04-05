@@ -14,7 +14,7 @@ export const createChannelService = async (
   memberId
 ) => {
   try {
-    const existingChannel = await getChannelByName(channelName);
+    const existingChannel = await getChannelByName(channelName, workspaceId);
 
     if (existingChannel) {
       return {
