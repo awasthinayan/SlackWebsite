@@ -38,7 +38,7 @@ import V1addMemberToWorkspace from "../V1/V1Workspace/V1addMemberToWorkspace.js"
 import V1addChannelToWorkspace from "../V1/V1Workspace/V1addChannelToWorkspace.js";
 import V1fetchAllWorkspaceByMemberId from "../V1/V1Workspace/V1fetchAllWorkspaceByMemberId.js";
 import V1getWorkspaceDetails from "../V1/V1Workspace/V1getWorkspaceDetails.js";
-
+import V1resetJoinCode from "../V1/V1Workspace/V1resetJoinCode.js";
 
 // All the member routes
 import V1CheckMember from "../V1/V1Member/V1CheckMember.js";
@@ -65,54 +65,55 @@ router.use(
   "/workspaces/createWorkspace",
   authMiddleware,
   validate(workspaceSchemaVaildation),
-  V1CreateWorkspace
+  V1CreateWorkspace,
 );
 router.use(
   "/workspaces/updateWorkspace/:id",
   authMiddleware,
   validate(workspaceSchemaVaildation),
-  V1updateWorkspace
+  V1updateWorkspace,
 );
 router.use("/workspaces/deleteWorkspace", authMiddleware, V1deletWorkspace);
-router.use(
-  "/workspaces/getAllWorkspace",
-  authMiddleware,
-  V1getAllWorkspaces
-);
+router.use("/workspaces/getAllWorkspace", authMiddleware, V1getAllWorkspaces);
 
 router.use("/workspaces/getWorkspaceByName", V1getWorkspaceByName);
 router.use(
-  "/workspaces/getWorkspaceByJoinCode",
+  "/workspaces/getWorkspaceByJoinCode/:joinCode",
   authMiddleware,
-  V1getWorkspaceByJoinCode
+  V1getWorkspaceByJoinCode,
 );
 router.use(
   "/workspaces/addMemberToWorkspace",
   validate(CheckMemberSchemaValidation),
-  V1addMemberToWorkspace
+  V1addMemberToWorkspace,
 );
 router.use(
   "/workspaces/addChannelToWorkspace",
   validate(CheckChannelSchemaValidation),
   authMiddleware,
-  V1addChannelToWorkspace
+  V1addChannelToWorkspace,
 );
 router.use(
   "/workspaces/fetchAllWorkspaceByMemberId",
-  V1fetchAllWorkspaceByMemberId
+  V1fetchAllWorkspaceByMemberId,
 );
 router.use("/workspaces/:workspaceId", authMiddleware, V1getWorkspaceDetails);
+
+router.use("/:workspaceId/joinCode/reset", authMiddleware, V1resetJoinCode);
 
 // All the channel routes
 
 router.use("/channel/createChannel", authMiddleware, V1CreateChannel);
 router.use("/channel/getAllChannel", V1getAllChannel);
 
-
 // All the member routes
 
 router.use("/V1/member/isMemberPartOfWorkspace", authMiddleware, V1CheckMember);
 
-router.use("/V1/member/DeleteMemberFromWorkspace", authMiddleware, V1DeleteMember);
+router.use(
+  "/V1/member/DeleteMemberFromWorkspace",
+  authMiddleware,
+  V1DeleteMember,
+);
 
 export default router;

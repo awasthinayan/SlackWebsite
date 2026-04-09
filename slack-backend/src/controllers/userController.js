@@ -95,14 +95,10 @@ export const updateUserController = async (req, res) => {
   try {
     const id = req.params.id;
     console.log("id in controller", id);
-    const { name, username, phone, address, gender, dob } = req.body;
+    const { username, password } = req.body;
     const result = await updateUserService(id, {
-      name,
       username,
-      phone,
-      address,
-      gender,
-      dob,
+      password,
     });
 
     if (!result.success) {

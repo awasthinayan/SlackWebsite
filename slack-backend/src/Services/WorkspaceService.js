@@ -25,7 +25,7 @@ import { workspacebyJoinMailObject } from "../common/mailObject.js";
 export const createWorkspaceService = async (
   workspaceName,
   description,
-  memberId
+  memberId,
 ) => {
   let workspace = null;
   try {
@@ -44,11 +44,7 @@ export const createWorkspaceService = async (
     }
 
     // STEP 1 → Create workspace
-    workspace = await createWorkspace(
-      workspaceName,
-      description,
-      JoinCode
-    );
+    workspace = await createWorkspace(workspaceName, description, JoinCode);
 
     if (!workspace) {
       return {
@@ -62,7 +58,7 @@ export const createWorkspaceService = async (
     const updatedWorkspace = await addMemberToWorkspaceRepo(
       workspace._id,
       memberId,
-      "admin"
+      "admin",
     );
     console.log("updatedWorkspace", updatedWorkspace);
     if (updatedWorkspace?.error) {
@@ -97,7 +93,7 @@ export const createWorkspaceService = async (
     const updatedWorkspaceChannels = await addChannelToWorkspace(
       workspaceName,
       channel._id,
-      channel.ChannelName
+      channel.ChannelName,
     );
 
     if (!updatedWorkspaceChannels) {
@@ -133,13 +129,13 @@ export const createWorkspaceService = async (
 export const updateWorkspaceService = async (
   id,
   workspaceName,
-  description
+  description,
 ) => {
   try {
     const updatedWorkspace = await updateWorkpace(
       id,
       workspaceName,
-      description
+      description,
     );
     console.log("Workspace not found", updateWorkpace);
 
@@ -206,7 +202,7 @@ export const deleteWorkspaceService = async (workspaceId, memberId) => {
     console.log("isMember check - searching for memberId:", memberId);
     console.log(
       "workspace members stored ids:",
-      workspace.members.map((m) => String(m.memberId._id || m.memberId))
+      workspace.members.map((m) => String(m.memberId._id || m.memberId)),
     );
     console.log("isMember result:", isMember);
     if (!isMember) {
@@ -368,7 +364,7 @@ export const getWorkspaceByJoinCodeService = async (JoinCode) => {
 export const addMemberToWorkspaceService = async (
   workspaceId,
   memberId,
-  role
+  role,
 ) => {
   try {
     console.log("🟦 SERVICE START");
@@ -402,7 +398,7 @@ export const addMemberToWorkspaceService = async (
 
     // Check if already a member
     const isMember = workspace.members.find(
-      (m) => String(m.memberId) === String(memberId)
+      (m) => String(m.memberId) === String(memberId),
     );
 
     if (isMember) {
@@ -415,10 +411,14 @@ export const addMemberToWorkspaceService = async (
 
     // Call Repo Layer
     console.log("🛠 Calling addMemberToWorkspaceRepo...");
-    const response = await addMemberToWorkspaceRepo(workspaceId, memberId, role);
+    const response = await addMemberToWorkspaceRepo(
+      workspaceId,
+      memberId,
+      role,
+    );
     console.log("🟩 Repo Response:", response);
 
-    if(response?.error){
+    if (response?.error) {
       return response;
     }
 
@@ -435,12 +435,11 @@ export const addMemberToWorkspaceService = async (
 
     const mailData = workspacebyJoinMailObject(response);
 
-    console.log('====================================');
+    console.log("====================================");
 
     console.log("🧪 FULL RESPONSE OBJECT:", JSON.stringify(response, null, 2));
 
-    console.log('====================================');
-    
+    console.log("====================================");
 
     const updateresponse = await addEmailtoMailQueue({
       ...mailData,
@@ -461,13 +460,12 @@ export const addMemberToWorkspaceService = async (
   }
 };
 
-
 // ------------------------------------------------------
 // ADD CHANNEL
 // ------------------------------------------------------
 export const addChannelToWorkspaceService = async (
   workspaceName,
-  channelId
+  channelId,
 ) => {
   try {
     const workspace = await getWorkspaceByName(workspaceName);
@@ -483,7 +481,7 @@ export const addChannelToWorkspaceService = async (
 
     // check if the channelId is already exist or not
     const alreadyChannel = workspace.channels.some(
-      (c) => String(c) === channelId
+      (c) => String(c) === channelId,
     );
     console.log("alreadyChannel", alreadyChannel);
     console.log("channelId", channelId);
@@ -506,6 +504,27 @@ export const addChannelToWorkspaceService = async (
       error: true,
       status: StatusCodes.INTERNAL_SERVER_ERROR,
       data: { message: "Server error", data: null },
+    };
+  }
+};
+
+export const resetWorkspaceJoinCodeService = async (workspaceId, userId) => {
+  try {
+    const newJoinCode = uuidv4().slice(0, 8).toUpperCase();
+    const updatedWorkspace = await updateWorkspaceService(
+      workspaceId,
+      {
+        JoinCode: newJoinCode,
+      },
+      userId,
+    );
+    return updatedWorkspace;
+  } catch (error) {
+    console.log(error);
+    return {
+      error: true,
+      status: StatusCodes.BAD_REQUEST,
+      data: { message: "Error while regenerating join code", data: null },
     };
   }
 };

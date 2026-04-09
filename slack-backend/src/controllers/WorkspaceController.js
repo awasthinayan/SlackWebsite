@@ -9,6 +9,7 @@ import {
   fetchAllWorkspaceByMemberIdService,
   getAllWorkspaceService,
   getWorkspaceDetailsService,
+  resetWorkspaceJoinCodeService,
 } from "../Services/WorkspaceService.js";
 
 export const createWorkspaceController = async (req, res) => {
@@ -16,7 +17,7 @@ export const createWorkspaceController = async (req, res) => {
     const Createworkspace = await createWorkspaceService(
       req.body.workspaceName,
       req.body.description,
-      req.user?._id
+      req.user?._id,
     );
     if (Createworkspace?.error) {
       console.log(Createworkspace.message);
@@ -44,7 +45,7 @@ export const updateWorkspaceController = async (req, res) => {
     const workspaceupdate = await updateWorkspaceService(
       id,
       req.body.workspaceName,
-      req.body.description
+      req.body.description,
     );
     if (workspaceupdate?.error) {
       console.log(workspaceupdate.message);
@@ -75,7 +76,7 @@ export const deleteWorkspaceController = async (req, res) => {
       "delete request workspaceId:",
       workspaceId,
       "user:",
-      req.user._id
+      req.user._id,
     );
 
     if (result?.error) {
@@ -147,7 +148,7 @@ export const getWorkspaceDetailsController = async (req, res) => {
 export const getWorkspaceByNameController = async (req, res) => {
   try {
     const getWorkspaceByname = await getWorkspaceByNameService(
-      req.body.workspaceName
+      req.body.workspaceName,
     );
     if (getWorkspaceByname?.error) {
       console.log(getWorkspaceByname.error);
@@ -172,7 +173,7 @@ export const getWorkspaceByNameController = async (req, res) => {
 export const getWorkspaceByJoinCodeController = async (req, res) => {
   try {
     const getWorkspaceByJoinCode = await getWorkspaceByJoinCodeService(
-      req.body.JoinCode
+      req.params.joinCode,
     );
     if (getWorkspaceByJoinCode?.error) {
       console.log(getWorkspaceByJoinCode.error);
@@ -184,7 +185,7 @@ export const getWorkspaceByJoinCodeController = async (req, res) => {
     res.status(200).json({
       message: "Workspace fetched successfully",
       status: true,
-      data: getWorkspaceByJoinCode,
+      data: getWorkspaceByJoinCode.data,
     });
   } catch (error) {
     return res.status(500).json({
@@ -199,7 +200,7 @@ export const addMemberToWorkspaceController = async (req, res) => {
     const addMemberSpace = await addMemberToWorkspaceService(
       req.params.workspaceId,
       req.body.memberId,
-      req.body.role
+      req.body.role,
     );
     if (addMemberSpace?.error) {
       console.log(addMemberSpace.message);
@@ -225,14 +226,14 @@ export const addChannelToWorkspaceController = async (req, res) => {
   try {
     const result = await addChannelToWorkspaceService(
       req.body.workspaceName,
-      req.body.channelId
+      req.body.channelId,
     );
     // console.log("result", result);
     // console.log("result.error", result.error);
     // console.log("result.message", result.message);
     // console.log("name in controller", req.params.workspaceName);
     // console.log("channelId in controller", req.body.channelId);
-      
+
     if (result.error) {
       return res.status(result.status).json({
         status: false,
@@ -246,7 +247,6 @@ export const addChannelToWorkspaceController = async (req, res) => {
       message: "Channel added successfully",
       data: result.data,
     });
-
   } catch (error) {
     return res.status(500).json({
       status: false,
@@ -279,3 +279,26 @@ export const fetchAllWorkspaceByMemberIdController = async (req, res) => {
     });
   }
 };
+
+export const resetJoinCodeController = async (req, res) => {
+  try {
+    const response = await resetWorkspaceJoinCodeService(req.params.workspaceId, req.user);
+    if (response?.error) {
+      return res.status(response.status).json({
+        message: response.data.message,
+        status: false,
+      });
+    }
+    res.status(200).json({
+      message: "Join code regenerated successfully",
+      status: true,
+      data: response.data,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: error.message,
+      status: false,
+    });
+  }
+}
