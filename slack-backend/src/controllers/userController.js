@@ -10,6 +10,7 @@ import {
   verifyOTPService,
   resetPasswordService,
   getAllUsersService,
+  verifyEmailService,
 } from "../Services/userService.js";
 
 export const registerUserController = async (req, res) => {
@@ -161,6 +162,16 @@ export const resetPasswordController = async (req, res) => {
   try {
     const { email, password } = req.body;
     const result = await resetPasswordService(email, password);
+    res.status(200).json({ ...result, status: true });
+  } catch (error) {
+    res.status(400).json({ message: error.message, status: false });
+  }
+};
+
+export const verifyEmailController = async (req, res) => {
+  try {
+    const { email, token } = req.body;
+    const result = await verifyEmailService(email, token);
     res.status(200).json({ ...result, status: true });
   } catch (error) {
     res.status(400).json({ message: error.message, status: false });

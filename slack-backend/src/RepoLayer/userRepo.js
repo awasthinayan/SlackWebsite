@@ -56,3 +56,36 @@ export const updateUserPassword = async (email, hashedPassword) => {
   existingUser.otpExpires = undefined;
   await existingUser.save();
 };
+
+export const saveEmailVerificationToken = async (email, token, expires) => {
+  return await user.findOneAndUpdate(
+    { email },
+    {
+      $set: {
+        emailVerificationToken: token,
+        emailVerificationExpires: expires,
+      },
+    },
+    { new: true },
+  );
+};
+
+export const verifyEmailToken = async (email, token) => {
+  return await user.findOneAndUpdate(
+    {
+      email,
+      emailVerificationToken: token,
+      emailVerificationExpires: { $gt: new Date() },
+    },
+    {
+      $set: {
+        isVerified: true,
+      },
+      $unset: {
+        emailVerificationToken: "",
+        emailVerificationExpires: "",
+      },
+    },
+    { new: true },
+  );
+};

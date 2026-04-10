@@ -13,6 +13,7 @@ import {
   fetchAllWorkspaceByMemberId,
   getWorkspaceById,
   addMemberToWorkspaceRepo,
+  resetJoinCode,
 } from "../RepoLayer/WorkspaceRepo.js";
 import { createChannel } from "../RepoLayer/ChannelRepo.js";
 import user from "../DBLayer/userSchema.js";
@@ -365,6 +366,7 @@ export const addMemberToWorkspaceService = async (
   workspaceId,
   memberId,
   role,
+  requesterId,
 ) => {
   try {
     console.log("🟦 SERVICE START");
@@ -381,6 +383,22 @@ export const addMemberToWorkspaceService = async (
         error: true,
         status: StatusCodes.NOT_FOUND,
         data: { message: "Workspace not found", data: null },
+      };
+    }
+
+    const isRequesterAdmin = workspace.members.some((member) => {
+      const currentMemberId = member?.memberId?._id || member?.memberId;
+      return (
+        String(currentMemberId) === String(requesterId) &&
+        member?.role === "admin"
+      );
+    });
+
+    if (!isRequesterAdmin) {
+      return {
+        error: true,
+        status: StatusCodes.FORBIDDEN,
+        data: { message: "Only admins can add members", data: null },
       };
     }
 
@@ -508,22 +526,59 @@ export const addChannelToWorkspaceService = async (
   }
 };
 
-export const resetWorkspaceJoinCodeService = async (workspaceId, userId) => {
+export const resetWorkspaceJoinCodeService = async (workspaceId, user) => {
   try {
-    const newJoinCode = uuidv4().slice(0, 8).toUpperCase();
-    const updatedWorkspace = await updateWorkspaceService(
-      workspaceId,
-      {
-        JoinCode: newJoinCode,
-      },
-      userId,
+    const workspace = await getWorkspaceById(workspaceId);
+
+    if (!workspace) {
+      return {
+        error: true,
+        status: StatusCodes.NOT_FOUND,
+        data: { message: "Workspace not found", data: null },
+      };
+    }
+
+    const userId = user?._id || user?.id;
+    const isAdmin = workspace.members.some((member) => {
+    const memberId = member.memberId?._id || member.memberId;
+    return (
+      String(memberId) === String(userId) &&
+      member.role === "admin"
     );
-    return updatedWorkspace;
+  });
+
+    console.log("isAdmin", isAdmin);
+    console.log("userId", userId);
+
+    if (!isAdmin) {
+      return {
+        error: true,
+        status: StatusCodes.FORBIDDEN,
+        data: { message: "Only workspace admins can reset join code", data: null },
+      };
+    }
+
+    const newJoinCode = uuidv4().slice(0, 8).toUpperCase();
+    const updatedWorkspace = await resetJoinCode(workspaceId, newJoinCode);
+
+    if (!updatedWorkspace) {
+      return {
+        error: true,
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        data: { message: "Error while regenerating join code", data: null },
+      };
+    }
+
+    return {
+      error: false,
+      status: StatusCodes.OK,
+      data: updatedWorkspace,
+    };
   } catch (error) {
     console.log(error);
     return {
       error: true,
-      status: StatusCodes.BAD_REQUEST,
+      status: StatusCodes.INTERNAL_SERVER_ERROR,
       data: { message: "Error while regenerating join code", data: null },
     };
   }
@@ -556,3 +611,66 @@ export const fetchAllWorkspaceByMemberIdService = async (userId) => {
     };
   }
 };
+
+export const joinWorkspaceBycodeService = async (workspaceId, joinCode, user) => {
+  try {
+    const workspace = await getWorkspaceById(workspaceId);
+
+    if (!workspace) {
+      return {
+        error: true,
+        status: StatusCodes.NOT_FOUND,
+        data: { message: "Workspace not found", data: null },
+      };
+    }
+
+    const userId = user?._id || user?.id;
+
+    if(!userId) {
+      return {
+        error: true,
+        status: StatusCodes.BAD_REQUEST,
+        data: { message: "User not found", data: null },
+      };
+    }
+
+    const joinCodeMatch =
+      (workspace?.JoinCode ?? workspace?.joinCode) === joinCode;
+    console.log("joinCodeMatch", joinCodeMatch);
+
+    if (!joinCodeMatch) {
+      return {
+        error: true,
+        status: StatusCodes.FORBIDDEN,
+        data: { message: "Invalid join code", data: null },
+      };
+    }
+
+    const updatedWorkspace = await addMemberToWorkspaceRepo(
+      workspaceId,
+      userId,
+      "member",
+    );
+
+    if (!updatedWorkspace) {
+      return {
+        error: true,
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+        data: { message: "Failed to add member to workspace", data: null },
+      };
+    }
+
+    return {
+      error: false,
+      status: StatusCodes.OK,
+      data: updatedWorkspace,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      error: true,
+      status: StatusCodes.INTERNAL_SERVER_ERROR,
+      data: { message: "Server error", data: null },
+    };
+  }
+}

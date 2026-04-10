@@ -1,48 +1,78 @@
+import bcrypt from "bcrypt";
+import crypto from "crypto";
+
+import { emailVerificationMailObject } from "../common/mailObject.js";
+import { addEmailtoMailQueue } from "../Producer/mailQueueProducer.js";
 import {
+  createUser,
   getAllUsers,
   getuserbyEmail,
-  updateUser,
-} from "../RepoLayer/userRepo.js";
-import bcrypt from "bcrypt";
-import { generateToken } from "../utils/jwt.js";
-import { createUser } from "../RepoLayer/userRepo.js";
-import {
+  getuserbyId,
+  saveEmailVerificationToken,
   saveOTP,
-  verifyOTP,
+  updateUser,
   updateUserPassword,
+  verifyEmailToken,
+  verifyOTP,
 } from "../RepoLayer/userRepo.js";
+import { generateToken } from "../utils/jwt.js";
 import { sendOtpViaBrevo } from "../utils/sendOtpViaBrevo.js";
-import { getuserbyId } from "../RepoLayer/userRepo.js";
-
 
 export const registerUserService = async (userData) => {
   try {
-    // some validation in server side
+    const { email, password, username } = userData;
 
-    const { email, password, username } =
-      userData;
-    if (
-      !email ||
-      !password ||
-      !username 
-    ) {
+    if (!email || !password || !username) {
       return { error: "Please fill all the fields" };
     }
 
-    const existingUser = await getuserbyEmail(userData.email);
+    const existingUser = await getuserbyEmail(email);
     if (existingUser) {
       return { error: "Email already exists" };
     }
 
-    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await createUser({
-      username: userData.username,
+      username,
       password: hashedPassword,
-      email: userData.email,
+      email,
+      isVerified: false,
     });
 
-    return newUser;
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    const expires = new Date(Date.now() + 15 * 60 * 1000);
+
+    await saveEmailVerificationToken(email, verificationToken, expires);
+
+    const rawFrontendUrl = process.env.FRONTEND_URL;
+    const frontendUrl =
+      rawFrontendUrl &&
+      rawFrontendUrl.trim() &&
+      rawFrontendUrl.trim().toLowerCase() !== "undefined"
+        ? rawFrontendUrl.trim()
+        : "http://localhost:5173";
+
+    const verificationLink = `${frontendUrl}/verify-email?email=${encodeURIComponent(
+      email,
+    )}&token=${verificationToken}`;
+
+    const mailData = emailVerificationMailObject({
+      username,
+      verificationLink,
+    });
+
+    await addEmailtoMailQueue({
+      ...mailData,
+      to: email,
+    });
+
+    return {
+      _id: newUser._id,
+      email: newUser.email,
+      username: newUser.username,
+      message: "User created successfully. Please verify your email.",
+    };
   } catch (error) {
     console.log(error);
     return { error: error.message };
@@ -54,13 +84,15 @@ export const loginUserService = async ({ email, password }) => {
     const user = await getuserbyEmail(email);
     if (!user) throw new Error("User not found");
 
-    // Validate password
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
       return { error: "Invalid password" };
     }
 
-    // Generate token using role from database ONLY
+    if (!user.isVerified) {
+      return { error: "Please verify your email before signing in" };
+    }
+
     const token = generateToken({
       _id: user.id,
       email: user.email,
@@ -68,7 +100,7 @@ export const loginUserService = async ({ email, password }) => {
 
     return {
       token,
-      _id:user.id,
+      _id: user.id,
       email: user.email,
     };
   } catch (error) {
@@ -149,14 +181,11 @@ export const sendOtpViaBrevoService = async (email) => {
       return { success: false, message: "User not found" };
     }
 
-    // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     console.log(otp);
 
-    // Save OTP in DB via Repo
     await saveOTP(email, otp);
 
-    // Send OTP mail
     const sent = await sendOtpViaBrevo(email, otp);
     if (!sent) throw new Error("Failed to send OTP email");
 
@@ -174,6 +203,7 @@ export const verifyOTPService = async (email, otp) => {
 
   const existingUser = await verifyOTP(email, otp);
   if (!existingUser) throw new Error("Invalid or expired OTP");
+
   console.log(existingUser);
   return { message: "OTP verified successfully" };
 };
@@ -191,4 +221,18 @@ export const resetPasswordService = async (email, password) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   await updateUserPassword(email, hashedPassword);
   return { message: "Password reset successful" };
+};
+
+export const verifyEmailService = async (email, token) => {
+  if (!email || !token) {
+    throw new Error("Email and token are required");
+  }
+
+  const verifiedUser = await verifyEmailToken(email, token);
+
+  if (!verifiedUser) {
+    throw new Error("Invalid or expired verification link");
+  }
+
+  return { message: "Email verified successfully" };
 };

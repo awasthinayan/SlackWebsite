@@ -10,6 +10,7 @@ import {
   getAllWorkspaceService,
   getWorkspaceDetailsService,
   resetWorkspaceJoinCodeService,
+  joinWorkspaceBycodeService,
 } from "../Services/WorkspaceService.js";
 
 export const createWorkspaceController = async (req, res) => {
@@ -201,11 +202,11 @@ export const addMemberToWorkspaceController = async (req, res) => {
       req.params.workspaceId,
       req.body.memberId,
       req.body.role,
+      req.user?._id,
     );
     if (addMemberSpace?.error) {
-      console.log(addMemberSpace.message);
-      return res.status(400).json({
-        message: addMemberSpace.message,
+      return res.status(addMemberSpace.status || 400).json({
+        message: addMemberSpace.data?.message || "Failed to add member",
         status: false,
       });
     }
@@ -282,14 +283,19 @@ export const fetchAllWorkspaceByMemberIdController = async (req, res) => {
 
 export const resetJoinCodeController = async (req, res) => {
   try {
-    const response = await resetWorkspaceJoinCodeService(req.params.workspaceId, req.user);
+    const response = await resetWorkspaceJoinCodeService(
+      req.params.workspaceId,
+      req.user
+    );
+
     if (response?.error) {
       return res.status(response.status).json({
         message: response.data.message,
         status: false,
       });
     }
-    res.status(200).json({
+
+    return res.status(200).json({
       message: "Join code regenerated successfully",
       status: true,
       data: response.data,
@@ -301,4 +307,33 @@ export const resetJoinCodeController = async (req, res) => {
       status: false,
     });
   }
-}
+};
+
+export const joinWorkspaceBycodeController = async (req, res) => {
+  try {
+    const response = await joinWorkspaceBycodeService(
+      req.params.workspaceId,
+      req.params.joinCode,
+      req.user,
+    );
+
+    if (response?.error) {
+      return res.status(response.status).json({
+        message: response.data.message,
+        status: false,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Joined workspace successfully",
+      status: true,
+      data: response.data,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: error.message,
+      status: false,
+    });
+  }
+};  

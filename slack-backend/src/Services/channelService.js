@@ -54,6 +54,15 @@ export const createChannelService = async (
       };
     }
 
+    if (isMember.role !== "admin") {
+      return {
+        error: true,
+        status: StatusCodes.FORBIDDEN,
+        message: "Only admins can create channels",
+        data: null,
+      };
+    }
+
     const newChannel = await createChannel(channelName, workspaceId,memberId);
 
     if (!newChannel) {

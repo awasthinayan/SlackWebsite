@@ -4,6 +4,7 @@ import V1userSignIn from "../V1/V1Auth/V1userSignIn.js";
 import V1sendOTP from "../V1/V1Auth/V1sendOTP.js";
 import V1verifyOTP from "../V1/V1Auth/V1verifyOTP.js";
 import V1resetPassword from "../V1/V1Auth/V1resetPassword.js";
+import V1verifyEmail from "../V1/V1Auth/V1verifyEmail.js";
 import { SignInSchema } from "../ZodValidation/SignInSchema.js";
 import { SignUpSchema } from "../ZodValidation/SignUpSchema.js";
 import {
@@ -39,6 +40,7 @@ import V1addChannelToWorkspace from "../V1/V1Workspace/V1addChannelToWorkspace.j
 import V1fetchAllWorkspaceByMemberId from "../V1/V1Workspace/V1fetchAllWorkspaceByMemberId.js";
 import V1getWorkspaceDetails from "../V1/V1Workspace/V1getWorkspaceDetails.js";
 import V1resetJoinCode from "../V1/V1Workspace/V1resetJoinCode.js";
+import V1joinWorkspaceBycode from "../V1/V1Workspace/V1joinWorkspaceBycode.js";
 
 // All the member routes
 import V1CheckMember from "../V1/V1Member/V1CheckMember.js";
@@ -58,6 +60,7 @@ router.use("/update", V1updateUser);
 router.use("/sendOTP", validate(ForgotPasswordEmailSchema), V1sendOTP);
 router.use("/verifyOTP", validate(VerifyOTPSchema), V1verifyOTP);
 router.use("/resetPassword", validate(ResetPasswordSchema), V1resetPassword);
+router.use("/verifyEmail", V1verifyEmail);
 
 // ALl the workspaces routes
 
@@ -93,13 +96,17 @@ router.use(
   authMiddleware,
   V1addChannelToWorkspace,
 );
+
 router.use(
   "/workspaces/fetchAllWorkspaceByMemberId",
+  authMiddleware,
   V1fetchAllWorkspaceByMemberId,
 );
 router.use("/workspaces/:workspaceId", authMiddleware, V1getWorkspaceDetails);
 
-router.use("/:workspaceId/joinCode/reset", authMiddleware, V1resetJoinCode);
+router.use("/workspaces/:workspaceId/joinCode/reset", authMiddleware, V1resetJoinCode);
+
+router.use("/workspaces/:workspaceId/joinCode/:joinCode", authMiddleware, V1joinWorkspaceBycode);
 
 // All the channel routes
 

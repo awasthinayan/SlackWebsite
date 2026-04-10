@@ -241,3 +241,16 @@ export const isUserisPartofWorkspace = async (workspaceId, memberId) => {
     return { error: true, status: 500, message: "Server error" };
   }
 };
+
+export const resetJoinCode = async (id, JoinCode) => {
+  try {
+    return await Workspace.findByIdAndUpdate(
+      id,
+      { $set: { JoinCode } },
+      { new: true }
+    );
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
