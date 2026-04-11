@@ -3,6 +3,7 @@ import {
   createChannel,
   getAllChannel,
   getChannelByName,
+  getChannelwithWorkspaceDetails,
   updateWorkspaceAddChannel,
 } from "../RepoLayer/ChannelRepo.js";
 
@@ -114,6 +115,36 @@ export const getAllChannelService = async () => {
       data: result,
     };
   } catch (error) {
+    return {
+      error: true,
+      status: StatusCodes.INTERNAL_SERVER_ERROR,
+      message: "Server error",
+      data: null,
+    };
+  }
+};
+
+export const getChannelByIdService = async (channelId) => {
+  try {
+    const channel = await getChannelwithWorkspaceDetails(channelId);
+
+    if (!channel) {
+      return {
+        error: true,
+        status: StatusCodes.NOT_FOUND,
+        message: "Channel not found",
+        data: null,
+      };
+    }
+
+    return {
+      error: false,
+      status: StatusCodes.OK,
+      message: "Channel details fetched successfully",
+      data: channel,
+    };
+  } catch (error) {
+    console.log(error);
     return {
       error: true,
       status: StatusCodes.INTERNAL_SERVER_ERROR,

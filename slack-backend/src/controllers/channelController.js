@@ -1,6 +1,7 @@
 import {
   createChannelService,
   getAllChannelService,
+  getChannelByIdService,
 } from "../Services/channelService.js";
 import { StatusCodes } from "http-status-codes";
 
@@ -49,6 +50,32 @@ export const getAllChannelController = async (req, res) => {
       message: "All channel fetched successfully",
       status: true,
       data: response,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: error.message,
+      status: false,
+    });
+  }
+};
+
+export const getChannelByIdController = async (req, res) => {
+  try {
+    const result = await getChannelByIdService(req.params.channelId);
+
+    if (result.error) {
+      return res.status(result.status || StatusCodes.NOT_FOUND).json({
+        message: result.message,
+        status: false,
+        data: result.data,
+      });
+    }
+
+    return res.status(result.status || StatusCodes.OK).json({
+      message: result.message,
+      status: true,
+      data: result.data,
     });
   } catch (error) {
     console.log(error);

@@ -17,10 +17,20 @@ export const createChannel = async (channelName, workspaceId) => {
 
 export const getChannelwithWorkspaceDetails = async (channelId) => {
   try {
-   const channel = await Channel.findById(channelId).populate(
-      'workspaceId',
-      'name'
-    );
+    const channel = await Channel.findById(channelId).populate({
+      path: "workspaceId",
+      select: "workspaceName description members channels JoinCode createdAt updatedAt",
+      populate: [
+        {
+          path: "members.memberId",
+          select: "username email",
+        },
+        {
+          path: "channels",
+          select: "ChannelName workspaceId createdAt updatedAt",
+        },
+      ],
+    });
     return channel;
   } catch (error) {
     console.log(error);
