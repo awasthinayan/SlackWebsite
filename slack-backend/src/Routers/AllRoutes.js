@@ -27,6 +27,8 @@ import authMiddleware from "../Middleware/authMiddleware.js";
 import V1CreateChannel from "../V1/V1Channel/V1CreateChannel.js";
 import V1getAllChannel from "../V1/V1Channel/V1getAllChannel.js";
 import V1getChannelById from "../V1/V1Channel/V1getChannelById.js";
+import V1updateChannel from "../V1/V1Channel/V1UpdateChannel.js";
+import V1deleteChannel from "../V1/V1Channel/V1DeleteChannel.js";
 
 // All the workspaces imports
 
@@ -105,14 +107,32 @@ router.use(
 );
 router.use("/workspaces/:workspaceId", authMiddleware, V1getWorkspaceDetails);
 
-router.use("/workspaces/:workspaceId/joinCode/reset", authMiddleware, V1resetJoinCode);
+router.use(
+  "/workspaces/:workspaceId/joinCode/reset",
+  authMiddleware,
+  V1resetJoinCode,
+);
 
-router.use("/workspaces/:workspaceId/joinCode/:joinCode", authMiddleware, V1joinWorkspaceBycode);
+router.use(
+  "/workspaces/:workspaceId/joinCode/:joinCode",
+  authMiddleware,
+  V1joinWorkspaceBycode,
+);
 
 // All the channel routes
 
 router.use("/channel/createChannel", authMiddleware, V1CreateChannel);
 router.use("/channel/getAllChannel", V1getAllChannel);
+router.use(
+  "/channel/deleteChannel/:channelId",
+  authMiddleware,
+  V1deleteChannel,
+);
+router.use(
+  "/channel/:channelId/update/:workspaceId",
+  authMiddleware,
+  V1updateChannel,
+);
 router.use("/channel/:channelId", authMiddleware, V1getChannelById);
 
 // All the member routes

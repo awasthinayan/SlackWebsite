@@ -76,3 +76,26 @@ export const updateWorkspaceAddChannel = async (workspaceId, channelId) => {
   }
 };
 
+export const deleteChannelById = async (channelId) => {
+  try {
+    const result = await Channel.findByIdAndDelete(channelId);
+    return result;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
+
+export const updateChannelById = async (channelId, channelName) => {
+  try {
+    const result = await Channel.findByIdAndUpdate(
+      channelId,
+      { ChannelName: channelName },
+      { new: true }
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
