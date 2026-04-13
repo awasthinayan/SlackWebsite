@@ -19,10 +19,6 @@ import { createChannel } from "../RepoLayer/ChannelRepo.js";
 import user from "../DBLayer/userSchema.js";
 import { workspacebyJoinMailObject } from "../common/mailObject.js";
 
-// ------------------------------------------------------
-// CREATE WORKSPACE
-// ------------------------------------------------------
-
 export const createWorkspaceService = async (
   workspaceName,
   description,
@@ -30,10 +26,9 @@ export const createWorkspaceService = async (
 ) => {
   let workspace = null;
   try {
-    // generate join code
+    
     const JoinCode = uuidv4().slice(0, 8).toUpperCase();
 
-    // check if workspace already exists
     const existing = await getWorkspaceByName(workspaceName);
 
     if (existing) {
@@ -44,7 +39,7 @@ export const createWorkspaceService = async (
       };
     }
 
-    // STEP 1 → Create workspace
+    
     workspace = await createWorkspace(workspaceName, description, JoinCode);
 
     if (!workspace) {
@@ -55,13 +50,12 @@ export const createWorkspaceService = async (
       };
     }
 
-    // STEP 2 → Add admin member
     const updatedWorkspace = await addMemberToWorkspaceRepo(
       workspace._id,
       memberId,
       "admin",
     );
-    console.log("updatedWorkspace", updatedWorkspace);
+
     if (updatedWorkspace?.error) {
       await deleteWorkspaceById(workspace._id);
       return updatedWorkspace;
@@ -76,10 +70,7 @@ export const createWorkspaceService = async (
       };
     }
 
-    // STEP 3 → Create default channel "general"
     const channel = await createChannel("general", workspace._id);
-    console.log("channel", channel);
-    console.log("workspaceId", workspace._id);
 
     if (!channel) {
       await deleteWorkspaceById(workspace._id);
@@ -90,7 +81,6 @@ export const createWorkspaceService = async (
       };
     }
 
-    // STEP 4 → Add channel to workspace
     const updatedWorkspaceChannels = await addChannelToWorkspace(
       workspaceName,
       channel._id,
@@ -124,9 +114,6 @@ export const createWorkspaceService = async (
   }
 };
 
-// ------------------------------------------------------
-// UPDATE WORKSPACE
-// ------------------------------------------------------
 export const updateWorkspaceService = async (
   id,
   workspaceName,
@@ -138,12 +125,9 @@ export const updateWorkspaceService = async (
       workspaceName,
       description,
     );
-    console.log("Workspace not found", updateWorkpace);
-
+    
     const findworkspace = await getWorkspaceByName(workspaceName);
-    console.log("findworkspace", findworkspace);
 
-    // Update that workspace that is already exist
     if (!updatedWorkspace) {
       return {
         error: true,
@@ -165,13 +149,8 @@ export const updateWorkspaceService = async (
   }
 };
 
-// ------------------------------------------------------
-// DELETE WORKSPACE
-// ------------------------------------------------------
-
 export const deleteWorkspaceService = async (workspaceId, memberId) => {
   try {
-    // For simplicity: require workspaceId (params) and treat it as ObjectId
     if (
       !workspaceId ||
       typeof workspaceId !== "string" ||
@@ -185,7 +164,6 @@ export const deleteWorkspaceService = async (workspaceId, memberId) => {
     }
 
     const workspace = await getWorkspaceById(workspaceId);
-    console.log("workspace in service:", workspaceId);
     if (!workspace) {
       return {
         error: true,
@@ -194,18 +172,10 @@ export const deleteWorkspaceService = async (workspaceId, memberId) => {
       };
     }
 
-    // Check whether the provided memberId is part of this workspace
-    // Note: m.memberId is a populated user object (has _id field), not a raw id
     const isMember = workspace.members.some((m) => {
       const storedId = m.memberId._id || m.memberId;
       return String(storedId) === String(memberId);
     });
-    console.log("isMember check - searching for memberId:", memberId);
-    console.log(
-      "workspace members stored ids:",
-      workspace.members.map((m) => String(m.memberId._id || m.memberId)),
-    );
-    console.log("isMember result:", isMember);
     if (!isMember) {
       return {
         error: true,
@@ -215,7 +185,6 @@ export const deleteWorkspaceService = async (workspaceId, memberId) => {
     }
 
     const deleted = await deleteWorkspaceById(workspaceId);
-    console.log("deleted in service:", deleted);
     return {
       error: false,
       status: StatusCodes.OK,
@@ -230,9 +199,6 @@ export const deleteWorkspaceService = async (workspaceId, memberId) => {
     };
   }
 };
-// ------------------------------------------------------
-// GET ALL WORKSPACE
-// ------------------------------------------------------
 
 export const getAllWorkspaceService = async () => {
   try {
@@ -260,9 +226,6 @@ export const getAllWorkspaceService = async () => {
   }
 };
 
-// ------------------------------------------------------
-// GET WORKSPACE DETAILS BY ID
-// ------------------------------------------------------
 export const getWorkspaceDetailsService = async (workspaceId) => {
   try {
     if (
@@ -301,9 +264,6 @@ export const getWorkspaceDetailsService = async (workspaceId) => {
   }
 };
 
-// ------------------------------------------------------
-// GET WORKSPACE BY NAME
-// ------------------------------------------------------
 export const getWorkspaceByNameService = async (workspaceName) => {
   try {
     const workspace = await getWorkspaceByName(workspaceName);
@@ -330,9 +290,6 @@ export const getWorkspaceByNameService = async (workspaceName) => {
   }
 };
 
-// ------------------------------------------------------
-// GET WORKSPACE BY JOIN CODE
-// ------------------------------------------------------
 export const getWorkspaceByJoinCodeService = async (JoinCode) => {
   try {
     const workspace = await getWorkspaceByJoinCode(JoinCode);
@@ -359,9 +316,6 @@ export const getWorkspaceByJoinCodeService = async (JoinCode) => {
   }
 };
 
-// ------------------------------------------------------
-// ADD MEMBER
-// ------------------------------------------------------
 export const addMemberToWorkspaceService = async (
   workspaceId,
   memberId,
@@ -369,14 +323,7 @@ export const addMemberToWorkspaceService = async (
   requesterId,
 ) => {
   try {
-    console.log("🟦 SERVICE START");
-    console.log("📌 workspaceId:", workspaceId);
-    console.log("📌 memberId:", memberId);
-    console.log("📌 role:", role);
-
-    // Fetch workspace
     const workspace = await getWorkspaceById(workspaceId);
-    console.log("📂 Workspace fetched:", workspace?._id);
 
     if (!workspace) {
       return {
@@ -402,9 +349,7 @@ export const addMemberToWorkspaceService = async (
       };
     }
 
-    // Validate user
     const isValidUser = await user.findById(memberId);
-    console.log("👤 User fetched:", isValidUser?._id);
 
     if (!isValidUser) {
       return {
@@ -414,7 +359,6 @@ export const addMemberToWorkspaceService = async (
       };
     }
 
-    // Check if already a member
     const isMember = workspace.members.find(
       (m) => String(m.memberId) === String(memberId),
     );
@@ -427,14 +371,11 @@ export const addMemberToWorkspaceService = async (
       };
     }
 
-    // Call Repo Layer
-    console.log("🛠 Calling addMemberToWorkspaceRepo...");
     const response = await addMemberToWorkspaceRepo(
       workspaceId,
       memberId,
       role,
     );
-    console.log("🟩 Repo Response:", response);
 
     if (response?.error) {
       return response;
@@ -448,23 +389,12 @@ export const addMemberToWorkspaceService = async (
       };
     }
 
-    // Mail Queue Job
-    console.log("📨 Adding Job To Mail Queue...");
-
     const mailData = workspacebyJoinMailObject(response);
-
-    console.log("====================================");
-
-    console.log("🧪 FULL RESPONSE OBJECT:", JSON.stringify(response, null, 2));
-
-    console.log("====================================");
 
     const updateresponse = await addEmailtoMailQueue({
       ...mailData,
       to: isValidUser.email,
     });
-
-    console.log("📮 Mail Queue Job Created:", updateresponse);
 
     return response;
   } catch (error) {
@@ -478,9 +408,6 @@ export const addMemberToWorkspaceService = async (
   }
 };
 
-// ------------------------------------------------------
-// ADD CHANNEL
-// ------------------------------------------------------
 export const addChannelToWorkspaceService = async (
   workspaceName,
   channelId,
@@ -488,7 +415,6 @@ export const addChannelToWorkspaceService = async (
   try {
     const workspace = await getWorkspaceByName(workspaceName);
 
-    // check if the workspace is already exist or not
     if (!workspace) {
       return {
         error: true,
@@ -497,12 +423,9 @@ export const addChannelToWorkspaceService = async (
       };
     }
 
-    // check if the channelId is already exist or not
     const alreadyChannel = workspace.channels.some(
       (c) => String(c) === channelId,
     );
-    console.log("alreadyChannel", alreadyChannel);
-    console.log("channelId", channelId);
 
     if (alreadyChannel) {
       return {
@@ -547,9 +470,6 @@ export const resetWorkspaceJoinCodeService = async (workspaceId, user) => {
     );
   });
 
-    console.log("isAdmin", isAdmin);
-    console.log("userId", userId);
-
     if (!isAdmin) {
       return {
         error: true,
@@ -584,11 +504,9 @@ export const resetWorkspaceJoinCodeService = async (workspaceId, user) => {
   }
 };
 
-// ------------------------------------------------------
 export const fetchAllWorkspaceByMemberIdService = async (userId) => {
   try {
     const response = await fetchAllWorkspaceByMemberId(userId);
-    console.log("id in service", userId);
 
     if (!response) {
       return {
@@ -636,7 +554,6 @@ export const joinWorkspaceBycodeService = async (workspaceId, joinCode, user) =>
 
     const joinCodeMatch =
       (workspace?.JoinCode ?? workspace?.joinCode) === joinCode;
-    console.log("joinCodeMatch", joinCodeMatch);
 
     if (!joinCodeMatch) {
       return {

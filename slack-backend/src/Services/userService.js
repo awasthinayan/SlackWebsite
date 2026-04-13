@@ -132,7 +132,6 @@ export const getAllUsersService = async () => {
 export const updateUserService = async (id, userData) => {
   try {
     const user = await getuserbyId(id);
-    console.log("response from service", user);
     if (!user) {
       return {
         success: false,
@@ -142,7 +141,6 @@ export const updateUserService = async (id, userData) => {
       };
     }
     const updatedUser = await updateUser(id, userData);
-    console.log(updatedUser);
     return {
       success: true,
       message: "User updated successfully",
@@ -204,7 +202,6 @@ export const verifyOTPService = async (email, otp) => {
   const existingUser = await verifyOTP(email, otp);
   if (!existingUser) throw new Error("Invalid or expired OTP");
 
-  console.log(existingUser);
   return { message: "OTP verified successfully" };
 };
 

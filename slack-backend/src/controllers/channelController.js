@@ -14,10 +14,8 @@ export const createChannelController = async (req, res) => {
       req.body.workspaceId,
       req.user?._id,
     );
-    console.log(result);
 
     if (result.error) {
-      console.log(result.message);
       return res.status(result.status || StatusCodes.BAD_REQUEST).json({
         message: result.message,
         status: false,
@@ -40,9 +38,7 @@ export const createChannelController = async (req, res) => {
 export const getAllChannelController = async (req, res) => {
   try {
     const response = await getAllChannelService();
-    console.log("result in controller", response);
     if (response.error) {
-      console.log(response.message);
       return res.status(StatusCodes.NOT_FOUND).json({
         message: response.message,
         status: false,

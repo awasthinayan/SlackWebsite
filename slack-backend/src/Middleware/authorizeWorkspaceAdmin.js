@@ -5,9 +5,6 @@ export const authorizeWorkspaceOwner = async (req, res, next) => {
     const { workspaceId } = req.params;
     const userId = req.user._id;
 
-    console.log("workspaceId in authorize", workspaceId);
-    console.log("userId in authorize", userId);
-
     const workspace = await getWorkspaceById(workspaceId);
 
     if (!workspace) {
@@ -22,8 +19,6 @@ export const authorizeWorkspaceOwner = async (req, res, next) => {
         String(m.memberId._id) === String(userId) &&
         m.role === "admin"
     );
-
-    console.log("isAdmin", isAdmin);
 
     if (!isAdmin) {
       return res.status(403).json({

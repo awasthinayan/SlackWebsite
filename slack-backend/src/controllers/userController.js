@@ -16,10 +16,8 @@ import {
 export const registerUserController = async (req, res) => {
   try {
     const user = await registerUserService(req.body);
-    console.log("Register request received:", req.body);
 
     if (user?.error) {
-      console.log(user.error);
       return res.status(400).json({
         message: user.error,
         status: false,
@@ -43,7 +41,6 @@ export const loginUserController = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate input
     if (!email || !password) {
       return res.status(400).json({
         status: false,
@@ -95,7 +92,6 @@ export const getAllUsersController = async (req, res) => {
 export const updateUserController = async (req, res) => {
   try {
     const id = req.params.id;
-    console.log("id in controller", id);
     const { username, password } = req.body;
     const result = await updateUserService(id, {
       username,
@@ -110,7 +106,6 @@ export const updateUserController = async (req, res) => {
       });
     }
 
-    // if user updated successfully
     return res.status(200).json({
       message: "User updated successfully",
       status: true,

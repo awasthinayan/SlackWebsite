@@ -1,4 +1,5 @@
 import {getChannelwithWorkspaceDetails} from "../RepoLayer/ChannelRepo.js";
+import { createMessage, getMessageDetails } from "../RepoLayer/messageRepo.js";
 
 export const getMessagesService = async (messageParams, page, limit, user) => {
  const channelDetails = await getChannelwithWorkspaceDetails(messageParams.channelId);
@@ -23,3 +24,10 @@ export const getMessagesService = async (messageParams, page, limit, user) => {
   return messages;
 };
 
+export const createMessageService = async (message) => {
+  const newMessage = await createMessage(message);
+
+  const messageDetails = await getMessageDetails(newMessage._id);
+
+  return messageDetails;
+};

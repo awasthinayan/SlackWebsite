@@ -18,7 +18,6 @@ export const getuserbyId = async (id) => {
 };
 
 export const updateUser = async (id, userData) => {
-  console.log("response from repo", id);
   return await user.findOneAndUpdate({ _id: id }, userData, {
     new: true,
     runValidators: true,
@@ -34,9 +33,8 @@ export const saveOTP = async (email, otp) => {
   if (!existingUser) {
     return { error: "User not found" };
   }
-  console.log(existingUser);
   existingUser.otp = otp;
-  existingUser.otpExpires = Date.now() + 5 * 60 * 1000; // valid for 5 minutes
+  existingUser.otpExpires = Date.now() + 5 * 60 * 1000; 
   await existingUser.save();
 };
 

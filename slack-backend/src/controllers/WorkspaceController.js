@@ -70,7 +70,6 @@ export const updateWorkspaceController = async (req, res) => {
 
 export const deleteWorkspaceController = async (req, res) => {
   try {
-    // expect workspace id in URL param
     const workspaceId = req.params.workspaceId;
     const result = await deleteWorkspaceService(workspaceId, req.user._id);
     console.log(
@@ -229,12 +228,7 @@ export const addChannelToWorkspaceController = async (req, res) => {
       req.body.workspaceName,
       req.body.channelId,
     );
-    // console.log("result", result);
-    // console.log("result.error", result.error);
-    // console.log("result.message", result.message);
-    // console.log("name in controller", req.params.workspaceName);
-    // console.log("channelId in controller", req.body.channelId);
-
+    
     if (result.error) {
       return res.status(result.status).json({
         status: false,
@@ -259,7 +253,6 @@ export const addChannelToWorkspaceController = async (req, res) => {
 export const fetchAllWorkspaceByMemberIdController = async (req, res) => {
   try {
     const result = await fetchAllWorkspaceByMemberIdService(req.user._id);
-    console.log("id in controller", req.user._id);
 
     if (result?.error) {
       console.log(result.message);

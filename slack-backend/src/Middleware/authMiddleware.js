@@ -3,7 +3,6 @@ import { verifyToken } from "../utils/jwt.js";
 
 export default async function authMiddleware(req, res, next) {
   try {
-    // check if token is present in header
     const token = req.headers["x-access-token"];
 
     if (!token) {
@@ -11,8 +10,6 @@ export default async function authMiddleware(req, res, next) {
         message: "No token provided",
       });
     }
-
-    // verify token
 
     const response = verifyToken(token);
 
@@ -24,8 +21,6 @@ export default async function authMiddleware(req, res, next) {
       });
     }
     req.user = response;
-
-    console.log("user in authMiddleware", req.user);
     next();
   } catch (error) {
     res.status(400).json({

@@ -28,11 +28,8 @@ export const createChannelService = async (
       };
     }
 
-    // check if workspace exists
     const workspace = await getWorkspaceById(workspaceId);
-    console.log(workspace);
 
-    // check if workspace exists first
     if (!workspace) {
       return {
         error: true,
@@ -42,7 +39,6 @@ export const createChannelService = async (
       };
     }
 
-    // check if user is part of workspace
     const isMember = workspace.members.find((m) => {
       const storedId = m.memberId._id || m.memberId;
       return String(storedId) === String(memberId);
@@ -99,7 +95,6 @@ export const createChannelService = async (
 export const getAllChannelService = async () => {
   try {
     const result = await getAllChannel();
-    console.log("result in service", result);
 
     if (!result) {
       return {
@@ -231,7 +226,6 @@ export const updateChannelService = async (channelId, workspaceId, channelName, 
 export const deleteChannelService = async (channelId,memberId) => {
   try {
     const channel = await getChannelwithWorkspaceDetails(channelId);
-    console.log(channel);
     if (!channel) {
       return {
         error: true,

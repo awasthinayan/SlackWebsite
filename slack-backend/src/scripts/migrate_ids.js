@@ -10,7 +10,6 @@ async function run() {
   await connectDB();
 
   const workspaces = await Workspace.find();
-  console.log(`Found ${workspaces.length} workspaces`);
 
   for (const ws of workspaces) {
     let modified = false;
@@ -64,7 +63,7 @@ async function run() {
           let chDoc = await Channel.findOne({ ChannelName: ch });
           if (!chDoc) {
             chDoc = await Channel.create({ ChannelName: ch });
-            console.log(`Created Channel "${ch}" -> ${chDoc._id}`);
+            console.log(`Created new Channel for "${ch}" -> ${chDoc._id}`);
           } else {
             console.log(`Found existing Channel for "${ch}" -> ${chDoc._id}`);
           }

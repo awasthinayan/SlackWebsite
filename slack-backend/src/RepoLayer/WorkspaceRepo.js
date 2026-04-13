@@ -37,7 +37,6 @@ export const deleteWorkspace = async (workspaceName) => {
 export const deleteWorkspaceById = async (workspaceId) => {
   try {
     const workspace = await Workspace.findByIdAndDelete(workspaceId);
-    console.log("id in repo", workspaceId);
     return workspace;
   } catch (error) {
     console.log(error);
@@ -74,12 +73,10 @@ export const getWorkspaceByJoinCode = async (JoinCode) => {
 
 export const fetchAllWorkspaceByMemberId = async (memberId) => {
   try {
-    // try to cast to ObjectId when possible to ensure matching against stored ObjectIds
     let queryId = memberId;
     try {
       queryId = mongoose.Types.ObjectId(memberId);
     } catch (e) {
-      // if casting fails, fall back to the original value (could already be an ObjectId)
       queryId = memberId;
     }
 
@@ -95,7 +92,7 @@ export const fetchAllWorkspaceByMemberId = async (memberId) => {
       " -> found workspaces:",
       workspaces.length
     );
-    // debug: list member ids in returned workspaces
+    
     workspaces.forEach((ws) => {
       console.log(
         "workspace",
@@ -115,10 +112,6 @@ export const fetchAllWorkspaceByMemberId = async (memberId) => {
 export const addMemberToWorkspaceRepo = async (workspaceId, memberId, role) => {
   try {
     const workspace = await Workspace.findById(workspaceId);
-    console.log("📂 Workspace fetched:", workspace?._id);
-    console.log("👤 Member fetched:", memberId);
-    console.log("👤 Role:", role);
-    console.log("workspace is", workspace);
 
     if (!workspace) {
       return {
@@ -128,11 +121,8 @@ export const addMemberToWorkspaceRepo = async (workspaceId, memberId, role) => {
       };
     }
 
-    // findById accepts the id value (string or ObjectId) directly
     const isValidUser = await user.findById(memberId);
-    console.log("👤 User fetched:", isValidUser?._id);
-    console.log("👤 User fetched:", isValidUser);
-
+   
     if (!isValidUser) {
       return {
         error: true,
@@ -141,7 +131,6 @@ export const addMemberToWorkspaceRepo = async (workspaceId, memberId, role) => {
       };
     }
 
-    // normalize and compare as strings to handle ObjectId vs string
     let memberObjectId = memberId;
     try {
       memberObjectId = mongoose.Types.ObjectId(memberId);
@@ -161,7 +150,6 @@ export const addMemberToWorkspaceRepo = async (workspaceId, memberId, role) => {
       };
     }
 
-    // ensure we store an ObjectId when possible
     const toPushMemberId = (() => {
       try {
         return mongoose.Types.ObjectId(memberId);
@@ -170,14 +158,9 @@ export const addMemberToWorkspaceRepo = async (workspaceId, memberId, role) => {
       }
     })();
 
-    console.log("👤 MemberId pushed:", toPushMemberId);
-
     workspace.members.push({ memberId: toPushMemberId, role });
 
     await workspace.save();
-
-    console.log("📂 Workspace updated:", workspace?._id);
-    console.log("📂 Workspace updated:", workspace);
 
     return workspace;
   } catch (error) {
@@ -189,7 +172,7 @@ export const addMemberToWorkspaceRepo = async (workspaceId, memberId, role) => {
 
 export const addChannelToWorkspace = async (workspaceName, channelId) => {
   try {
-    // cast channelId to ObjectId when possible
+
     let chId = channelId;
     try {
       chId = mongoose.Types.ObjectId(channelId);
@@ -198,7 +181,7 @@ export const addChannelToWorkspace = async (workspaceName, channelId) => {
     }
   return await Workspace.findOneAndUpdate(
       { workspaceName },
-      { $addToSet: { channels: chId } }, // prevents duplicates
+      { $addToSet: { channels: chId } }, 
       { new: true }
     ).populate("channels");
   } catch (error) {

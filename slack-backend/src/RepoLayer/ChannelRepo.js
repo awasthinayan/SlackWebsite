@@ -7,7 +7,6 @@ export const createChannel = async (channelName, workspaceId) => {
       ChannelName: channelName,
       workspaceId,
     });
-    console.log(result);
     return result;
   } catch (error) {
     console.log(error);
@@ -54,7 +53,6 @@ export const getChannelByName = async (channelName, workspaceId) => {
 export const getAllChannel = async () => {
   try {
     const result = await Channel.find();
-    console.log("result", result);
     return result;
   } catch (error) {
     console.log(error);

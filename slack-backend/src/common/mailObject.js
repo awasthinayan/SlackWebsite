@@ -1,8 +1,8 @@
 import { MAIL_ID } from "../config/serverConfig.js";
 
 export const workspacebyJoinMailObject = function (workspace) {
-  console.log("Mail Data:", workspace);
-  console.log("Mail Data Name of the workspace:", workspace.workspaceName);
+  // console.log("Mail Data:", workspace);
+  // console.log("Mail Data Name of the workspace:", workspace.workspaceName);
   return {
     from: MAIL_ID,
     subject: "You have been added to workspace",
