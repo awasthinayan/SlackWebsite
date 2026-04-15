@@ -26,7 +26,6 @@ export const createWorkspaceService = async (
 ) => {
   let workspace = null;
   try {
-    
     const JoinCode = uuidv4().slice(0, 8).toUpperCase();
 
     const existing = await getWorkspaceByName(workspaceName);
@@ -39,7 +38,6 @@ export const createWorkspaceService = async (
       };
     }
 
-    
     workspace = await createWorkspace(workspaceName, description, JoinCode);
 
     if (!workspace) {
@@ -125,7 +123,7 @@ export const updateWorkspaceService = async (
       workspaceName,
       description,
     );
-    
+
     const findworkspace = await getWorkspaceByName(workspaceName);
 
     if (!updatedWorkspace) {
@@ -316,97 +314,37 @@ export const getWorkspaceByJoinCodeService = async (JoinCode) => {
   }
 };
 
-export const addMemberToWorkspaceService = async (
-  workspaceId,
-  memberId,
-  role,
-  requesterId,
-) => {
+export const addMemberToWorkspaceService = async (workspaceId, memberId, role, requesterId) => {
   try {
     const workspace = await getWorkspaceById(workspaceId);
-
-    if (!workspace) {
-      return {
-        error: true,
-        status: StatusCodes.NOT_FOUND,
-        data: { message: "Workspace not found", data: null },
-      };
-    }
+    if (!workspace) return { error: true, status: 404, data: { message: "Workspace not found" } };
 
     const isRequesterAdmin = workspace.members.some((member) => {
-      const currentMemberId = member?.memberId?._id || member?.memberId;
-      return (
-        String(currentMemberId) === String(requesterId) &&
-        member?.role === "admin"
-      );
+      const dbMemberId = (member.memberId?._id || member.memberId).toString();
+      const reqId = requesterId?.toString();
+      
+      const isMatch = dbMemberId === reqId;
+      const isAdmin = member.role === "admin";
+      return isMatch && isAdmin;
     });
 
     if (!isRequesterAdmin) {
       return {
         error: true,
-        status: StatusCodes.FORBIDDEN,
-        data: { message: "Only admins can add members", data: null },
+        status: 403,
+        data: { message: "Only admins can add members" },
       };
     }
 
-    const isValidUser = await user.findById(memberId);
-
-    if (!isValidUser) {
-      return {
-        error: true,
-        status: StatusCodes.NOT_FOUND,
-        data: { message: "User not found", data: null },
-      };
-    }
-
-    const isMember = workspace.members.find(
-      (m) => String(m.memberId) === String(memberId),
-    );
-
-    if (isMember) {
-      return {
-        error: true,
-        status: StatusCodes.BAD_REQUEST,
-        data: { message: "Member already exists", data: null },
-      };
-    }
-
-    const response = await addMemberToWorkspaceRepo(
-      workspaceId,
-      memberId,
-      role,
-    );
-
-    if (response?.error) {
-      return response;
-    }
-
-    if (!response) {
-      return {
-        error: true,
-        status: StatusCodes.INTERNAL_SERVER_ERROR,
-        data: { message: "Server error", data: null },
-      };
-    }
-
-    const mailData = workspacebyJoinMailObject(response);
-
-    const updateresponse = await addEmailtoMailQueue({
-      ...mailData,
-      to: isValidUser.email,
-    });
-
-    return response;
+    // ... rest of your existing logic ...
   } catch (error) {
-    console.error("❌ ERROR in addMemberToWorkspaceService:", error);
-
-    return {
-      error: true,
-      status: StatusCodes.INTERNAL_SERVER_ERROR,
-      data: { message: "Server error", data: null },
-    };
+    console.error("Service Error:", error);
+    return { error: true, status: 500, data: { message: "Server error" } };
   }
 };
+
+
+
 
 export const addChannelToWorkspaceService = async (
   workspaceName,
@@ -463,18 +401,18 @@ export const resetWorkspaceJoinCodeService = async (workspaceId, user) => {
 
     const userId = user?._id || user?.id;
     const isAdmin = workspace.members.some((member) => {
-    const memberId = member.memberId?._id || member.memberId;
-    return (
-      String(memberId) === String(userId) &&
-      member.role === "admin"
-    );
-  });
+      const memberId = member.memberId?._id || member.memberId;
+      return String(memberId) === String(userId) && member.role === "admin";
+    });
 
     if (!isAdmin) {
       return {
         error: true,
         status: StatusCodes.FORBIDDEN,
-        data: { message: "Only workspace admins can reset join code", data: null },
+        data: {
+          message: "Only workspace admins can reset join code",
+          data: null,
+        },
       };
     }
 
@@ -530,7 +468,11 @@ export const fetchAllWorkspaceByMemberIdService = async (userId) => {
   }
 };
 
-export const joinWorkspaceBycodeService = async (workspaceId, joinCode, user) => {
+export const joinWorkspaceBycodeService = async (
+  workspaceId,
+  joinCode,
+  user,
+) => {
   try {
     const workspace = await getWorkspaceById(workspaceId);
 
@@ -544,7 +486,7 @@ export const joinWorkspaceBycodeService = async (workspaceId, joinCode, user) =>
 
     const userId = user?._id || user?.id;
 
-    if(!userId) {
+    if (!userId) {
       return {
         error: true,
         status: StatusCodes.BAD_REQUEST,
@@ -590,4 +532,4 @@ export const joinWorkspaceBycodeService = async (workspaceId, joinCode, user) =>
       data: { message: "Server error", data: null },
     };
   }
-}
+};

@@ -86,21 +86,6 @@ export const fetchAllWorkspaceByMemberId = async (memberId) => {
       .populate("members.memberId")
       .populate("channels");
 
-    console.log(
-      "id in repo",
-      memberId,
-      " -> found workspaces:",
-      workspaces.length
-    );
-    
-    workspaces.forEach((ws) => {
-      console.log(
-        "workspace",
-        ws.workspaceName,
-        "members:",
-        ws.members.map((m) => String(m.memberId))
-      );
-    });
 
     return workspaces;
   } catch (error) {

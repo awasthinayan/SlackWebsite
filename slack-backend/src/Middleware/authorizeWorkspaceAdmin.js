@@ -3,7 +3,16 @@ import { getWorkspaceById } from "../RepoLayer/WorkspaceRepo.js";
 export const authorizeWorkspaceOwner = async (req, res, next) => {
   try {
     const { workspaceId } = req.params;
-    const userId = req.user._id;
+    
+    // 1. Safety check: Handle 'id' vs '_id' from the authMiddleware
+    const userId = req.user?._id || req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        error: true,
+        message: "User not authenticated",
+      });
+    }
 
     const workspace = await getWorkspaceById(workspaceId);
 
@@ -14,11 +23,14 @@ export const authorizeWorkspaceOwner = async (req, res, next) => {
       });
     }
 
-    const isAdmin = workspace.members.some(
-      (m) =>
-        String(m.memberId._id) === String(userId) &&
-        m.role === "admin"
-    );
+    // 2. Robust Admin Check: Handles both populated and unpopulated memberId
+    const isAdmin = workspace.members.some((m) => {
+      const memberIdInDb = m.memberId?._id 
+        ? m.memberId._id.toString() 
+        : m.memberId.toString();
+        
+      return memberIdInDb === userId.toString() && m.role === "admin";
+    });
 
     if (!isAdmin) {
       return res.status(403).json({
@@ -27,9 +39,13 @@ export const authorizeWorkspaceOwner = async (req, res, next) => {
       });
     }
 
+    // 3. Optional: Pass the workspace object to the next controller 
+    // to avoid refetching it in the service layer
+    req.workspace = workspace;
+
     next();
   } catch (error) {
-    console.error(error);
+    console.error("Authorization Error:", error);
     return res.status(500).json({
       error: true,
       message: "Authorization failed",

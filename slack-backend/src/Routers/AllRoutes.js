@@ -45,9 +45,14 @@ import V1getWorkspaceDetails from "../V1/V1Workspace/V1getWorkspaceDetails.js";
 import V1resetJoinCode from "../V1/V1Workspace/V1resetJoinCode.js";
 import V1joinWorkspaceBycode from "../V1/V1Workspace/V1joinWorkspaceBycode.js";
 
+
 // All the member routes
 import V1CheckMember from "../V1/V1Member/V1CheckMember.js";
 import V1DeleteMember from "../V1/V1Member/V1DeleteMember.js";
+import V1GetMemberDetails from "../V1/V1Member/V1GetMemberDetails.js";
+
+// All the message routes
+import V1getAllMessages from "../V1/V1Message/V1getAllMessages.js";
 
 const router = express.Router();
 
@@ -90,6 +95,7 @@ router.use(
 );
 router.use(
   "/workspaces/addMemberToWorkspace",
+  authMiddleware,
   validate(CheckMemberSchemaValidation),
   V1addMemberToWorkspace,
 );
@@ -139,10 +145,16 @@ router.use("/channel/:channelId", authMiddleware, V1getChannelById);
 
 router.use("/V1/member/isMemberPartOfWorkspace", authMiddleware, V1CheckMember);
 
+router.use("/member/getMemberDetails", authMiddleware, V1GetMemberDetails);
+
 router.use(
   "/V1/member/DeleteMemberFromWorkspace",
   authMiddleware,
   V1DeleteMember,
 );
+
+// All message routes
+
+router.use("/messages", authMiddleware, V1getAllMessages);
 
 export default router;

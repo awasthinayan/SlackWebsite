@@ -1,6 +1,8 @@
-
 import { getuserbyId } from "../RepoLayer/userRepo.js";
-import { getWorkspaceById, isUserisPartofWorkspace } from "../RepoLayer/WorkspaceRepo.js"
+import {
+  getWorkspaceById,
+  isUserisPartofWorkspace,
+} from "../RepoLayer/WorkspaceRepo.js";
 
 export const isMemberPartOfWorkspaceService = async (workspaceId, memberId) => {
   const workspace = await getWorkspaceById(workspaceId);
@@ -39,15 +41,33 @@ export const deleteMemberService = async (workspaceId, memberId, adminId) => {
   if (!user) throw new Error("User not found");
 
   const isMember = workspace.members.some(
-    (m) => String(m.memberId._id) === String(memberId)
+    (m) => String(m.memberId._id) === String(memberId),
   );
 
   if (!isMember) {
     throw new Error("User is not part of workspace");
   }
 
-workspace.members.pull({ memberId });
-await workspace.save();
+  workspace.members.pull({ memberId });
+  await workspace.save();
 
-return user;
+  return user;
+};
+
+export const getMemberDetailsService = async (memberId) => {
+  try {
+    const memberDetails = await getuserbyId(memberId);
+    if (!memberDetails) {
+      return { success: false, message: 'Member not found' };
+    }
+    return {
+      success: true,
+      message: 'Member details fetched successfully',
+      status: 200,
+      data: memberDetails,
+    };
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 };

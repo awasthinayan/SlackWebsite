@@ -8,6 +8,8 @@ import { PORT } from "./config/serverConfig.js";
 import bullserverAdapter from "./config/BullBoardConfig.js";
 import {Server} from "socket.io";
 import {createServer} from "http";
+import channelsocketController from "./controllers/channelSocketController.js";
+import messageSocketController from "./controllers/messageSocketController.js";
 
 dotenv.config();
 
@@ -47,6 +49,9 @@ app.get("/", (req, res) => {
 
 io.on('connection', (socket) => {
   console.log('a user connected', socket.id);
+
+  channelsocketController(io, socket);
+  messageSocketController(io, socket);
 
 // socket.on('messageFromClient', (data) => {
 //   console.log('message from client', data);

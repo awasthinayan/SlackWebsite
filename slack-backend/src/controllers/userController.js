@@ -1,4 +1,5 @@
 import user from "../DBLayer/userSchema.js";
+import { getMemberDetailsService } from "../Services/memberService.js";
 import {
   registerUserService,
   loginUserService,
@@ -134,7 +135,10 @@ export const sendOTPController = async (req, res) => {
     } else {
       return res
         .status(400)
-        .json({ message: result.message || "Failed to send OTP", status: false });
+        .json({
+          message: result.message || "Failed to send OTP",
+          status: false,
+        });
     }
   } catch (error) {
     console.error("Error in sendOTPController:", error);
@@ -167,6 +171,16 @@ export const verifyEmailController = async (req, res) => {
   try {
     const { email, token } = req.body;
     const result = await verifyEmailService(email, token);
+    res.status(200).json({ ...result, status: true });
+  } catch (error) {
+    res.status(400).json({ message: error.message, status: false });
+  }
+};
+
+export const GetDetailsofMemberController = async (req, res) => {
+  try {
+    const { memberId } = req.params;
+    const result = await getMemberDetailsService(memberId);
     res.status(200).json({ ...result, status: true });
   } catch (error) {
     res.status(400).json({ message: error.message, status: false });
