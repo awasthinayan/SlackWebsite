@@ -3,11 +3,8 @@ import mailer from "../config/mailConfig.js";
 
 mailQueue.process(async (job)  => {
     const emailData = job.data;
-    console.log("processing mail", emailData);
-
 try {
-    const response = await mailer.sendMail(emailData)
-    console.log("Mail sent", response);
+    const response = await mailer.sendMail(emailData);
 } catch (error) {
     console.log(error);
 }

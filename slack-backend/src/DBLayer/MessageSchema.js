@@ -12,17 +12,31 @@ const MessageSchema = new mongoose.Schema(
     channelId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Channel",
-      required: [true, "Channel id is required"],
+      default: null,
+    },
+    conversationId: {
+      type: String,
+      default: null,
+      index: true,
     },
     SenderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
       required: [true, "Sender id is required"],
     },
+    RecipientId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+      default: null,
+    },
     WorkspaceId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Workspace",
       required: [true, "Workspace id is required"],
+    },
+    isDirect: {
+      type: Boolean,
+      default: false,
     },
     createdAt: {
       type: Date,

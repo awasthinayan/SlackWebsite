@@ -3,6 +3,6 @@ import { deleteChannelController } from "../../controllers/channelController.js"
 
 const router = express.Router({ mergeParams: true });
 
-router.delete("/", deleteChannelController);
+router.delete("/:channelId", deleteChannelController);
 
 export default router;

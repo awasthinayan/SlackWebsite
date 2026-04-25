@@ -96,12 +96,14 @@ export const loginUserService = async ({ email, password }) => {
     const token = generateToken({
       _id: user.id,
       email: user.email,
+      username: user.username,
     });
 
     return {
       token,
       _id: user.id,
       email: user.email,
+      username: user.username,
     };
   } catch (error) {
     console.log(error);

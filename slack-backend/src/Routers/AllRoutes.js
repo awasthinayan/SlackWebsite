@@ -53,6 +53,7 @@ import V1GetMemberDetails from "../V1/V1Member/V1GetMemberDetails.js";
 
 // All the message routes
 import V1getAllMessages from "../V1/V1Message/V1getAllMessages.js";
+import V1getDirectMessages from "../V1/V1Message/V1getDirectMessages.js";
 
 const router = express.Router();
 
@@ -130,7 +131,7 @@ router.use(
 router.use("/channel/createChannel", authMiddleware, V1CreateChannel);
 router.use("/channel/getAllChannel", V1getAllChannel);
 router.use(
-  "/channel/deleteChannel/:channelId",
+  "/channel/deleteChannel",
   authMiddleware,
   V1deleteChannel,
 );
@@ -155,6 +156,7 @@ router.use(
 
 // All message routes
 
+router.use("/messages/dm", authMiddleware, V1getDirectMessages);
 router.use("/messages", authMiddleware, V1getAllMessages);
 
 export default router;

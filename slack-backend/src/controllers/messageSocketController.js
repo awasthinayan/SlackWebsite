@@ -1,18 +1,26 @@
 import { createMessageService } from '../services/messageService.js';
 import {
   NEW_MESSAGE_EVENT,
-  NEW_MESSAGE_RECEIVED_EVENT
+  NEW_MESSAGE_RECEIVED_EVENT,
+  USER_STOPPED_TYPING_EVENT
 } from '../utils/Common/eventConstants.js';
 
 export default function messageHandlers(io, socket) {
   socket.on(NEW_MESSAGE_EVENT, async function createMessageHandler(data, cb) {
     try {
-      console.log("Data received in controller:", data);
-      
       const { channelId } = data;
       const messageResponse = await createMessageService(data);
+      const roomId = data?.isDirect ? data?.conversationId : channelId;
       
-      io.to(channelId).emit(NEW_MESSAGE_RECEIVED_EVENT, messageResponse);
+      io.to(roomId).emit(NEW_MESSAGE_RECEIVED_EVENT, {
+        roomId,
+        message: messageResponse,
+        isDirect: Boolean(data?.isDirect),
+      });
+      socket.to(roomId).emit(USER_STOPPED_TYPING_EVENT, {
+        channelId: roomId,
+        userId: data?.SenderId,
+      });
       
       if (cb) {
         cb({
@@ -23,7 +31,6 @@ export default function messageHandlers(io, socket) {
       }
     } catch (error) {
       console.error("Error in createMessageHandler:", error);
-      // Send error back to client instead of letting the process crash
       if (cb) {
         cb({
           success: false,

@@ -6,7 +6,8 @@ export const getPaginatedMessages = async (messageParams, page, limit) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate("SenderId", "username email");
+      .populate("SenderId", "username email")
+      .populate("RecipientId", "username email");
 
     return messages;
   } catch (error) {
@@ -17,10 +18,9 @@ export const getPaginatedMessages = async (messageParams, page, limit) => {
 
 export const getMessageDetails = async (messageId) => {
   try {
-    const message = await Message.findById(messageId).populate(
-      "SenderId",
-      "username email",
-    );
+    const message = await Message.findById(messageId)
+      .populate("SenderId", "username email")
+      .populate("RecipientId", "username email");
     return message;
   } catch (error) {
     console.error("Error in getMessageDetails Repo:", error);
@@ -29,11 +29,13 @@ export const getMessageDetails = async (messageId) => {
 };
 
 export const createMessage = async (messageData) => {
-  console.log("Data being sent to DB:", messageData);
   try {
     const newMessage = await Message.create(messageData);
 
-    return await newMessage.populate("SenderId");
+    return await newMessage.populate([
+      { path: "SenderId", select: "username email" },
+      { path: "RecipientId", select: "username email" },
+    ]);
   } catch (error) {
     console.error("Error in createMessage Repo:", error);
     throw error;
@@ -48,7 +50,9 @@ export const updateMessage = async (messageId, messageData) => {
       {
         new: true,
       },
-    ).populate("SenderId", "username email");
+    )
+      .populate("SenderId", "username email")
+      .populate("RecipientId", "username email");
 
     return updatedMessage;
   } catch (error) {

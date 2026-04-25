@@ -21,7 +21,6 @@ export const createWorkspaceController = async (req, res) => {
       req.user?._id,
     );
     if (Createworkspace?.error) {
-      console.log(Createworkspace.message);
       return res.status(400).json({
         message: Createworkspace.message,
         status: false,
@@ -49,7 +48,7 @@ export const updateWorkspaceController = async (req, res) => {
       req.body.description,
     );
     if (workspaceupdate?.error) {
-      console.log(workspaceupdate.message);
+      
       return res.status(400).json({
         message: workspaceupdate.message,
         status: false,
@@ -72,12 +71,6 @@ export const deleteWorkspaceController = async (req, res) => {
   try {
     const workspaceId = req.params.workspaceId;
     const result = await deleteWorkspaceService(workspaceId, req.user._id);
-    console.log(
-      "delete request workspaceId:",
-      workspaceId,
-      "user:",
-      req.user._id,
-    );
 
     if (result?.error) {
       return res.status(result.status).json({
@@ -102,7 +95,6 @@ export const getAllWorkspaceController = async (req, res) => {
   try {
     const getWorkspaces = await getAllWorkspaceService();
     if (getWorkspaces?.error) {
-      console.log(getWorkspaces.error);
       return res.status(400).json({
         message: getWorkspaces.error,
         status: false,
@@ -151,7 +143,6 @@ export const getWorkspaceByNameController = async (req, res) => {
       req.body.workspaceName,
     );
     if (getWorkspaceByname?.error) {
-      console.log(getWorkspaceByname.error);
       return res.status(400).json({
         message: getWorkspaceByname.error,
         status: false,
@@ -176,7 +167,6 @@ export const getWorkspaceByJoinCodeController = async (req, res) => {
       req.params.joinCode,
     );
     if (getWorkspaceByJoinCode?.error) {
-      console.log(getWorkspaceByJoinCode.error);
       return res.status(400).json({
         message: getWorkspaceByJoinCode.error,
         status: false,
@@ -255,7 +245,6 @@ export const fetchAllWorkspaceByMemberIdController = async (req, res) => {
     const result = await fetchAllWorkspaceByMemberIdService(req.user._id);
 
     if (result?.error) {
-      console.log(result.message);
       return res.status(result.status || 500).json({
         message: result.message || result?.data?.message,
         status: false,

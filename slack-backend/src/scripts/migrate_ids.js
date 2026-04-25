@@ -21,9 +21,6 @@ async function run() {
         if (isObjectIdString(m.memberId)) {
           ws.members[i].memberId = mongoose.Types.ObjectId(m.memberId);
           modified = true;
-          console.log(
-            `Converted string memberId to ObjectId for workspace ${ws._id}`
-          );
         } else {
           // try to resolve to a real user by username/email/name
           const found = await User.findOne({
@@ -63,9 +60,10 @@ async function run() {
           let chDoc = await Channel.findOne({ ChannelName: ch });
           if (!chDoc) {
             chDoc = await Channel.create({ ChannelName: ch });
-            console.log(`Created new Channel for "${ch}" -> ${chDoc._id}`);
           } else {
-            console.log(`Found existing Channel for "${ch}" -> ${chDoc._id}`);
+            console.log(
+              `Skipping duplicate channel name "${ch}" in workspace ${ws._id}`
+            );
           }
           ws.channels[i] = chDoc._id;
           modified = true;
@@ -75,11 +73,8 @@ async function run() {
 
     if (modified) {
       await ws.save();
-      console.log(`Saved updates to workspace ${ws._id}`);
     }
   }
-
-  console.log("Migration complete");
   process.exit(0);
 }
 
