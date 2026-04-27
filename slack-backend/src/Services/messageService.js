@@ -2,6 +2,7 @@ import { getChannelwithWorkspaceDetails } from "../RepoLayer/ChannelRepo.js";
 import { createMessage, getMessageDetails, getPaginatedMessages } from "../RepoLayer/messageRepo.js";
 import { isUserisPartofWorkspace } from "../RepoLayer/WorkspaceRepo.js";
 import { getuserbyId } from "../RepoLayer/userRepo.js";
+import { normalizeMessageImage } from "../utils/messageImage.js";
 
 const buildDirectConversationId = (workspaceId, userA, userB) => {
   return [
@@ -40,7 +41,10 @@ export const getMessagesService = async (messageParams, page, limit, user) => {
 };
 
 export const createMessageService = async (message) => {
-  const newMessage = await createMessage(message);
+  const newMessage = await createMessage({
+    ...message,
+    image: normalizeMessageImage(message.image),
+  });
 
   const messageDetails = await getMessageDetails(newMessage._id);
 

@@ -1,5 +1,15 @@
-import { getDirectMessagesService, getMessagesService } from "../Services/messageService.js";
+import cloudinary from "../config/CloudinarySdk.js";
+import {
+  getDirectMessagesService,
+  getMessagesService,
+} from "../Services/messageService.js";
 import { StatusCodes } from "http-status-codes";
+import crypto from "crypto";
+import {
+  CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET,
+  CLOUDINARY_CLOUD_NAME,
+} from "../config/serverConfig.js";
 
 export const getMessagesController = async (req, res) => {
   try {
@@ -7,10 +17,9 @@ export const getMessagesController = async (req, res) => {
       { channelId: req.params.channelId },
       req.query.page || 1,
       req.query.limit || 20,
-      req.user, // Assuming this contains the user ID/object from auth middleware
+      req.user,
     );
 
-    // Check if the service returned an error object (since you aren't using a custom error handler)
     if (messages.error) {
       return res.status(messages.status || StatusCodes.BAD_REQUEST).json({
         success: false,
@@ -63,6 +72,36 @@ export const getDirectMessagesController = async (req, res) => {
     });
   } catch (error) {
     console.error("Direct message controller error:", error);
+    const statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+
+    return res.status(statusCode).json({
+      success: false,
+      message: error.message || "Server error",
+      data: null,
+    });
+  }
+};
+
+export const getCloudinarySignatureController = async (req, res) => {
+  try {
+    const timestamp = Math.floor(Date.now() / 1000);
+    const signature = crypto
+      .createHash("sha256")
+      .update(`timestamp=${timestamp}${CLOUDINARY_API_SECRET}`)
+      .digest("hex");
+
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        apiKey: CLOUDINARY_API_KEY,
+        cloudName: CLOUDINARY_CLOUD_NAME,
+        timestamp,
+        signature,
+      },
+      message: "Signature generated successfully",
+    });
+  } catch (error) {
+    console.error("Cloudinary signature error:", error);
     const statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
 
     return res.status(statusCode).json({

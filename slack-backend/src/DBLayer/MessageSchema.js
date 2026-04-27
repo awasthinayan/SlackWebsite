@@ -7,7 +7,8 @@ const MessageSchema = new mongoose.Schema(
       required: [true, "Message body is required"],
     },
     image: {
-      type: String,
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
     },
     channelId: {
       type: mongoose.Schema.Types.ObjectId,
